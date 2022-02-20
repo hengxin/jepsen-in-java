@@ -30,4 +30,9 @@ public class NoopClient implements Client {
         }
         return null;
     }
+
+    @Override
+    public Exception Start() {
+        return null;
+    }
 }

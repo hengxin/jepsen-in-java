@@ -10,4 +10,6 @@ public interface Client {
     Exception SetUp(Zone zone);
 
     Exception TearDown(Zone zone);
+
+    Exception Start();
 }

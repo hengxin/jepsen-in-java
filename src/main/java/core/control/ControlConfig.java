@@ -7,6 +7,9 @@ import java.util.ArrayList;
 public class ControlConfig {
     private String db;
     private ArrayList<Zone> zones;
+    private int clientCount;
+
+
 
 
     public String getDb() {
@@ -15,5 +18,9 @@ public class ControlConfig {
 
     public ArrayList<Zone> getZones() {
         return zones;
+    }
+
+    public int getClientCount() {
+        return clientCount;
     }
 }

@@ -35,7 +35,9 @@ public class NemesisGenerators {
     }
 
     public NemesisGenerator Next() {
-        return generators.get(index);
+        NemesisGenerator generator = generators.get(index);
+        index++;
+        return generator;
     }
 
     public void Reset() {
