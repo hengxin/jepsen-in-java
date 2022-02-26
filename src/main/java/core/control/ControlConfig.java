@@ -5,15 +5,15 @@ import core.db.Zone;
 import java.util.ArrayList;
 
 public class ControlConfig {
-    private String db;
+    private String dbName;
     private ArrayList<Zone> zones;
     private int clientCount;
 
 
 
 
-    public String getDb() {
-        return db;
+    public String getDBName() {
+        return dbName;
     }
 
     public ArrayList<Zone> getZones() {

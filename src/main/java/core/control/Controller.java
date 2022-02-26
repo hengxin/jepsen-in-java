@@ -2,6 +2,7 @@ package core.control;
 
 import core.client.Client;
 import core.client.ClientCreator;
+import core.db.DB;
 import core.db.Zone;
 import core.nemesis.Nemesis;
 import core.nemesis.NemesisGenerator;
@@ -28,13 +29,15 @@ public class Controller {
     }
 
     public void SendControlToClient() {
+
+        SetUpDB();
+
         Thread nemesisThread = new Thread(() -> DispatchNemesis());
         nemesisThread.start();
 
-        CountDownLatch cdl = new CountDownLatch(this.config.getClientCount());
-        for(int i = 0; i < this.config.getZones().size(); i++) {
-            if(i >= this.config.getClientCount())
-                break;
+        int threadNum = Math.min(this.clients.size(), this.config.getClientCount());
+        CountDownLatch cdl = new CountDownLatch(threadNum);
+        for(int i = 0; i < threadNum; i++) {
             Client client = this.clients.get(i);
             new Thread(() -> {
                 client.Start();     // TODO parameters
@@ -47,6 +50,17 @@ public class Controller {
             nemesisThread.join();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void SetUpDB() {
+        DB db = DB.GetDB(this.config.getDBName());
+        if(db == null)
+            return;
+        for(Zone zone: this.config.getZones()) {
+            Exception exception = db.SetUp(zone);
+            if(exception != null)
+                System.out.println(exception.getMessage());
         }
     }
 
@@ -94,7 +108,7 @@ public class Controller {
         }
 
         System.out.println("Nemesis " + nemesis.Name() + " is recovering...");
-        exception = nemesis.Recover(nemesisOperation.getZone());        // TODO maybe try it repeatedly in a specific interval
+        exception = nemesis.Recover(nemesisOperation.getZone());        // TODO maybe retry it many times in a specific interval
         if(exception != null) {
             System.out.println("Recover nemesis " + nemesis.Name() + " failed: " + exception.getMessage());
         }

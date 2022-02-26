@@ -8,6 +8,11 @@ import core.nemesis.Nemesis;
 
 public class Constant {
 
+    public static final int SSH_PORT = 22;
+    public static final int OCEANBASE_PORT = 2881;
+
+    public static final String WGET_EXEC = "yum -y install wget";
+
     static {
         // Register DB
         NoopDB noopDB = new NoopDB();
