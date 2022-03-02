@@ -1,0 +1,35 @@
+yum -y install wget
+
+wget https://mirrors.aliyun.com/oceanbase/community/stable/el/7/x86_64/ob-deploy-1.0.0-1.el7.x86_64.rpm
+yum install -y ob-deploy-1.0.0-1.el7.x86_64.rpm
+source /etc/profile.d/obd.sh
+
+wget https://mirrors.aliyun.com/oceanbase/community/stable/el/7/x86_64/oceanbase-ce-libs-3.1.0-1.el7.x86_64.rpm
+wget https://mirrors.aliyun.com/oceanbase/community/stable/el/7/x86_64/oceanbase-ce-3.1.0-1.el7.x86_64.rpm
+wget https://mirrors.aliyun.com/oceanbase/community/stable/el/7/x86_64/obproxy-3.1.0-1.el7.x86_64.rpm
+
+obd mirror clone oceanbase-ce-libs-3.1.0-1.el7.x86_64.rpm
+obd mirror clone oceanbase-ce-3.1.0-1.el7.x86_64.rpm
+obd mirror clone obproxy-3.1.0-1.el7.x86_64.rpm
+
+
+
+wget -i -c http://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
+yum -y install mysql57-community-release-el7-10.noarch.rpm
+
+
+yum -y module disable mysql
+yum -y install mysql-community-server --nogpgcheck
+
+systemctl start mysqld.service
+
+echo 'skip_grant_tables' >> /etc/my.cnf
+service mysqld restart
+mysql -u root -e "update mysql.user set authentication_string = password('root') where user = 'root'"
+mysql -u root -e "update mysql.user set host = '%' where user = 'root'"
+mysql -u root -e "update mysql.user set password_expired='N'"
+mysql -u root -e "flush privileges"
+sed -i '$d' /etc/my.cnf
+service mysqld restart
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+firewall-cmd --reload

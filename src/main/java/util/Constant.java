@@ -5,6 +5,11 @@ import core.db.NoopDB;
 import core.nemesis.KillNemesis;
 import core.nemesis.Nemesis;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 
 public class Constant {
 
@@ -24,5 +29,21 @@ public class Constant {
         KillNemesis killNemesis = new KillNemesis();
 
         Nemesis.RegisterNemesis(killNemesis);
+    }
+
+    static public String TxtToString(String filePath) {
+        try {
+            Path path = Paths.get(filePath);
+            List<String> lines = Files.readAllLines(path);
+            StringBuilder result  = new StringBuilder();
+            for(String line: lines) {
+                if(!line.equals(""))
+                    result.append(line).append("\n");
+            }
+            return result.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }

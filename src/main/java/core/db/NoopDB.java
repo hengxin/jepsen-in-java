@@ -12,7 +12,8 @@ public class NoopDB implements DB {
     @Override
     public Exception SetUp(Zone zone) {
         System.out.println("Set up NoopDB in" + zone.getIP());
-        String downloadDBCommand = "";      // TODO &&连接 maybe提前下wget,mysql等库
+        String downloadDBCommand = Constant.TxtToString("src/main/resources/obd_mysql.txt");
+        // TODO 怎么把输出搞成实时的会提高用户体验 不然会执行很久没反应
         return ExecuteCommand(zone, downloadDBCommand);
     }
 
