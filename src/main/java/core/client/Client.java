@@ -4,12 +4,11 @@ import core.db.Zone;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
 
-public interface Client {
+abstract public class Client {
 
-    Exception SetUp(Zone zone);
+    public Statement statement;
 
-    Exception TearDown(Zone zone);
-
-    Exception Start();
+    abstract public Exception Start();
 }

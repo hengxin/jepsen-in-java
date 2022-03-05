@@ -9,6 +9,8 @@ import core.nemesis.NemesisGenerator;
 import core.nemesis.NemesisGenerators;
 import core.nemesis.NemesisOperation;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -28,11 +30,12 @@ public class Controller {
         this.lock = new ReentrantReadWriteLock();
     }
 
-    public void SendControlToClient() {
+    public void Run() {
 
         SetUpDB();
+        SetUpClient();
 
-        Thread nemesisThread = new Thread(() -> DispatchNemesis());
+        Thread nemesisThread = new Thread(this::DispatchNemesis);
         nemesisThread.start();
 
         int threadNum = Math.min(this.clients.size(), this.config.getClientCount());
@@ -40,7 +43,7 @@ public class Controller {
         for(int i = 0; i < threadNum; i++) {
             Client client = this.clients.get(i);
             new Thread(() -> {
-                client.Start();     // TODO parameters
+                client.Start();
                 cdl.countDown();
             }).start();
         }
@@ -61,6 +64,19 @@ public class Controller {
             Exception exception = db.SetUp(zone);
             if(exception != null)
                 System.out.println(exception.getMessage());
+        }
+    }
+
+    private void SetUpClient() {
+        ArrayList<Zone> zones = this.config.getZones();
+        for(int i = 0; i < zones.size(); i++) {
+            Zone zone = zones.get(i);
+            try {
+                Connection connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
+                this.clients.get(i).statement = connection.createStatement();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

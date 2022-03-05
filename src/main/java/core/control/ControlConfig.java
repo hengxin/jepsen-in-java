@@ -1,5 +1,6 @@
 package core.control;
 
+import com.jcraft.jsch.Session;
 import core.db.Zone;
 
 import java.util.ArrayList;
@@ -8,8 +9,6 @@ public class ControlConfig {
     private String dbName;
     private ArrayList<Zone> zones;
     private int clientCount;
-
-
 
 
     public String getDBName() {
