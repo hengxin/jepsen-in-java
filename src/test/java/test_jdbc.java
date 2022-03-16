@@ -1,11 +1,11 @@
 import java.sql.*;
 
-public class test_obd {
+public class test_jdbc {
     // MySQL 8.0 以下版本 - JDBC 驱动名及数据库 URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-//    static final String DB_URL = "jdbc:mysql://192.168.62.5:2881/oceanbase";
-    static final String DB_URL = "jdbc:mysql://192.168.62.7:3306/mysql";
-//    static final String DB_URL = "jdbc:mysql://192.168.62.4:2881/oceanbase";
+    static final String DB_URL = "jdbc:mysql://192.168.62.7:2881/oceanbase";
+//    static final String DB_URL = "jdbc:mysql://192.168.62.6:2883/oceanbase";
+//    static final String DB_URL = "jdbc:mysql://192.168.62.7:3306/mysql";
     // 数据库的用户名与密码，需要根据自己的设置
     static final String USER = "root";
     static final String PASS = "root";
@@ -16,7 +16,7 @@ public class test_obd {
         Statement stmt = null;
         try{
             // 注册 JDBC 驱动
-//            Class.forName(JDBC_DRIVER);
+//            Class.forName("com.mysql.jdbc.Driver");
 
             // 打开链接
             System.out.println("连接数据库...");
@@ -26,17 +26,17 @@ public class test_obd {
             System.out.println("实例化Statement对象...");
             stmt = conn.createStatement();
             String sql;
-            sql = "SELECT * FROM user";
-//            sql = "SELECT * FROM v$unit";
+//            sql = "SELECT * FROM user";
+            sql = "SELECT * FROM v$unit";
             ResultSet rs = stmt.executeQuery(sql);
 
             // 展开结果集数据库
             while(rs.next()){
                 // 通过字段检索
-                String db = rs.getString("host");
-                String user = rs.getString("user");
-//                String db = rs.getString("unit_config_name");
-//                String user = rs.getString("resource_pool_name");
+//                String db = rs.getString("host");
+//                String user = rs.getString("user");
+                String db = rs.getString("unit_config_name");
+                String user = rs.getString("resource_pool_name");
 
                 // 输出数据
                 System.out.println(db + " " + user);

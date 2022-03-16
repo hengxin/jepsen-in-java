@@ -8,7 +8,15 @@ import java.sql.Statement;
 
 abstract public class Client {
 
-    public Statement statement;
+    private Connection connection;
 
     abstract public Exception Start();
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
 }

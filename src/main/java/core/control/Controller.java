@@ -8,6 +8,7 @@ import core.nemesis.Nemesis;
 import core.nemesis.NemesisGenerator;
 import core.nemesis.NemesisGenerators;
 import core.nemesis.NemesisOperation;
+import util.Constant;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,6 +25,7 @@ public class Controller {
 
     public Controller(ControlConfig config, ClientCreator clientCreator, String nemesisNames) {
         this.config = config;
+        clients = new ArrayList<>();
         for(Zone zone: config.getZones())
             clients.add(clientCreator.Create(zone));
         this.generators = NemesisGenerators.ParseNemesisGenerators(nemesisNames);
@@ -35,9 +37,6 @@ public class Controller {
         SetUpDB();
         SetUpClient();
 
-        Thread nemesisThread = new Thread(this::DispatchNemesis);
-        nemesisThread.start();
-
         int threadNum = Math.min(this.clients.size(), this.config.getClientCount());
         CountDownLatch cdl = new CountDownLatch(threadNum);
         for(int i = 0; i < threadNum; i++) {
@@ -48,6 +47,9 @@ public class Controller {
             }).start();
         }
 
+        Thread nemesisThread = new Thread(this::DispatchNemesis);
+        nemesisThread.start();
+
         try {
             cdl.await();
             nemesisThread.join();
@@ -57,7 +59,7 @@ public class Controller {
     }
 
     private void SetUpDB() {
-        DB db = DB.GetDB(this.config.getDBName());
+        DB db = Constant.GetDB(this.config.getDBName());
         if(db == null)
             return;
         for(Zone zone: this.config.getZones()) {
@@ -72,8 +74,10 @@ public class Controller {
         for(int i = 0; i < zones.size(); i++) {
             Zone zone = zones.get(i);
             try {
+                Class.forName("com.mysql.jdbc.Driver");
                 Connection connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
-                this.clients.get(i).statement = connection.createStatement();
+                this.clients.get(i).setConnection(connection);
+                System.out.println("Set up client in " + zone.getIP());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -111,19 +115,27 @@ public class Controller {
     }
 
     private void OnNemesis(NemesisOperation nemesisOperation) {
-        Nemesis nemesis = Nemesis.GetNemesis(nemesisOperation.getNemesisName());
+        String ip = nemesisOperation.getZone().getIP();
+        Nemesis nemesis = Constant.GetNemesis(nemesisOperation.getNemesisName());
         if(nemesis == null) {
             System.out.println("Nemesis " + nemesis.Name() + " hasn't been registered!");
             return;
         }
 
-        System.out.println("Nemesis " + nemesis.Name() + " is running...");
+        System.out.println("Nemesis " + nemesis.Name() + " is running to " + ip + "...");
         Exception exception = nemesis.Invoke(nemesisOperation.getZone());
         if(exception != null) {
             System.out.println("Run nemesis " + nemesis.Name() + " failed: " + exception.getMessage());
         }
 
-        System.out.println("Nemesis " + nemesis.Name() + " is recovering...");
+        try {
+            System.out.println("Continuous nemesis in " + ip + "for " + nemesisOperation.getRunTime() + "seconds...");
+            Thread.sleep(nemesisOperation.getRunTime().toMillis());    // 直接把time.duration的值变成毫秒级给sleep()
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Nemesis " + nemesis.Name() + "in "+ ip +" is recovering...");
         exception = nemesis.Recover(nemesisOperation.getZone());        // TODO maybe retry it many times in a specific interval
         if(exception != null) {
             System.out.println("Recover nemesis " + nemesis.Name() + " failed: " + exception.getMessage());

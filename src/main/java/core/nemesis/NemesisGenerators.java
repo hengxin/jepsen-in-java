@@ -7,7 +7,7 @@ public class NemesisGenerators {
     // 静态方法，根据对应名字产生需要的generator
     public static NemesisGenerators ParseNemesisGenerators(String kinds) {
         ArrayList<NemesisGenerator> generators = new ArrayList<>();
-        for(String kind: kinds.split(",")){
+        for(String kind: kinds.split(" ")){
             kind = kind.trim();
             switch (kind) {
                 case "":

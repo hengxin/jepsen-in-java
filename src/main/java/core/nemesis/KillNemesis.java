@@ -1,6 +1,8 @@
 package core.nemesis;
 
 import core.db.Zone;
+import util.Constant;
+import util.Support;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -11,12 +13,14 @@ import java.util.Random;
 public class KillNemesis implements Nemesis {
     @Override
     public Exception Invoke(Zone zone) {
-        return null;
+        String command = "pidof observer | xargs kill -STOP";
+        return Support.ExecuteCommand(zone, command);
     }
 
     @Override
     public Exception Recover(Zone zone) {
-        return null;
+        String command = "pidof observer | xargs kill -CONT";
+        return Support.ExecuteCommand(zone, command);
     }
 
     @Override
@@ -36,7 +40,8 @@ class KillGenerator implements NemesisGenerator {
     @Override
     public ArrayList<NemesisOperation> Generate(ArrayList<Zone> zones) {
         int n;
-        Duration duration = Duration.ofMinutes(1).plusSeconds(new Random().nextInt(60));    // 默认至少一分钟最多两分钟
+        Duration duration = Duration.ofSeconds(new Random().nextInt(10));
+//        Duration duration = Duration.ofMinutes(1).plusSeconds(new Random().nextInt(60));    // 默认至少一分钟最多两分钟
         switch (this.kind){
             case "all_kill":
                 n = zones.size();
@@ -60,7 +65,7 @@ class KillGenerator implements NemesisGenerator {
             n = length;
 
         for(int i = 0; i < n; i++)
-            operations.add(new NemesisOperation(Nemesis.KILL_NODE, zones.get(indices.get(i)), duration,null));
+            operations.add(new NemesisOperation(Nemesis.KILL_NODE, zones.get(indices.get(i)), duration));
         return operations;
     }
 }
