@@ -2,6 +2,7 @@ package util;
 
 import com.jcraft.jsch.*;
 import core.db.Zone;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
@@ -10,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+
+@Slf4j
 public class Support {
 
     private static JSch jsch = new JSch();
@@ -25,7 +28,7 @@ public class Support {
             }
             return result.toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return "";
         }
     }
@@ -44,14 +47,14 @@ public class Support {
             exec.connect();
 
             String s = IOUtils.toString(in, "UTF-8");
-            System.out.println("结果："+s);
+            log.info("执行命令：" + command + " 结果："+s);
 
             in.close();
             exec.disconnect();
             session.disconnect();
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return e;
         }
     }
@@ -73,7 +76,7 @@ public class Support {
             session.disconnect();
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return e;
         }
     }
@@ -82,19 +85,19 @@ public class Support {
         private long transferred;
         @Override
         public void init(int op, String src, String dest, long max) {
-            System.out.println("Transferring begin.");
+            log.info("Transferring begin.");
         }
 
         @Override
         public boolean count(long count) {
             transferred = transferred + count;
-            System.out.println("Currently transferred total size: " + transferred + " bytes");
+            log.info("Currently transferred total size: " + transferred + " bytes");
             return true;
         }
 
         @Override
         public void end() {
-            System.out.println("Transferring done.");
+            log.info("Transferring done.");
         }
     }
 }

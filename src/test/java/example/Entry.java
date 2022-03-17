@@ -3,18 +3,14 @@ package example;
 import core.control.ControlConfig;
 import core.control.Controller;
 import core.db.Zone;
-import core.nemesis.Nemesis;
-import org.junit.jupiter.api.BeforeAll;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.Constant;
-import util.Support;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 
+@Slf4j
 public class Entry {
 
     Constant constant = new Constant();
@@ -38,9 +34,5 @@ public class Entry {
 
     @Test
     public void t() {
-        Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String value = dateFormat.format(date);
-        System.out.println(value);
     }
 }

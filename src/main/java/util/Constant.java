@@ -6,6 +6,7 @@ import core.db.OceanbaseDB;
 import core.db.Zone;
 import core.nemesis.KillNemesis;
 import core.nemesis.Nemesis;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
@@ -15,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 
-
+@Slf4j
 public class Constant {
 
     public static final int SSH_PORT = 22;
@@ -41,14 +42,14 @@ public class Constant {
         if(!DB_MAP.containsKey(db.Name()))
             DB_MAP.put(db.Name(), db);
         else
-            System.out.println("Duplicate db key " + db.Name() + ", discarded!");
+            log.warn("Duplicate db key " + db.Name() + ", discarded!");
     }
 
     public void RegisterNemesis(Nemesis nemesis) {
         if(!NEMESIS_MAP.containsKey(nemesis.Name()))
             NEMESIS_MAP.put(nemesis.Name(), nemesis);
         else
-            System.out.println("Duplicate nemesis key " + nemesis.Name() + ", discarded!");
+            log.warn("Duplicate nemesis key " + nemesis.Name() + ", discarded!");
     }
 
     public static DB GetDB(String name) {

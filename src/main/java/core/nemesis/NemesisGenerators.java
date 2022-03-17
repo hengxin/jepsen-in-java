@@ -1,7 +1,11 @@
 package core.nemesis;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 
+
+@Slf4j
 public class NemesisGenerators {
 
     // 静态方法，根据对应名字产生需要的generator
@@ -16,7 +20,7 @@ public class NemesisGenerators {
                     generators.add(new KillGenerator(kind));
                     break;
                 default:
-                    System.out.println("unknown kind generator");        // TODO 把所有sout和exception.print都变成日志[log4j]
+                    log.warn("unknown kind generator");
             }
         }
         return new NemesisGenerators(generators, 0);

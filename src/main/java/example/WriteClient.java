@@ -1,12 +1,13 @@
 package example;
 
 import core.client.Client;
-
-import javax.xml.transform.sax.SAXSource;
+import lombok.extern.slf4j.Slf4j;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+
+@Slf4j
 public class WriteClient extends Client {
 
     int sequence;
@@ -28,11 +29,12 @@ public class WriteClient extends Client {
                 String value = "IP." + sequence + " " + dateFormat.format(date);
                 String writeSQL = String.format("INSERT INTO t1 VALUES(\"%s\");", value);
                 statement.execute(writeSQL);
-                System.out.println("Successfully add " + value);
+                // 这里如果节点数据库进程被stop 是会一直卡住直到进程恢复
+                log.info("Successfully add " + value);
             }
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return e;
         } finally {
             try {
@@ -40,7 +42,7 @@ public class WriteClient extends Client {
                 if(statement != null)
                     statement.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
     }

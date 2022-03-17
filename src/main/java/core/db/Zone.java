@@ -1,6 +1,5 @@
 package core.db;
 
-import java.sql.Connection;
 
 public class Zone {
     private String ip;
@@ -17,6 +16,7 @@ public class Zone {
 
     public String getOceanBaseURL(){
         return "jdbc:mysql://" + ip + ":" + port + "/oceanbase";
+//        return "jdbc:mysql://" + ip + ":" + port + "/oceanbase?connectTimeout=4000";
     }
 
     public String getIP() {
