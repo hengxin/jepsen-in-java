@@ -77,7 +77,6 @@ public class Controller {
         for(int i = 0; i < zones.size(); i++) {
             Zone zone = zones.get(i);
             try {
-                Class.forName("com.mysql.jdbc.Driver");
                 Connection connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
                 this.clients.get(i).setConnection(connection);
                 log.info("Set up client in " + zone.getIP());
