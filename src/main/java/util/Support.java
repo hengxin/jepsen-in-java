@@ -9,7 +9,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
+import java.util.function.Function;
+
+import static util.Constant.*;
 
 
 @Slf4j
@@ -33,9 +40,56 @@ public class Support {
         }
     }
 
+    // executeQuery用于select
+    public static String JDBCQuery(Zone zone, String sql, Function<ResultSet, String> handle) {
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
+            statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(sql);
+            return handle.apply(rs);
+        } catch(Exception e) {
+            log.error(e.getMessage());
+            return "";
+        } finally {
+            try {
+                if (statement != null)
+                    statement.close();
+                if(connection != null)
+                    connection.close();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
+    }
+
+    // executeUpdate用于create, insert, delete, update
+    public static int JDBCUpdate(Zone zone, String sql) {
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
+            statement = connection.createStatement();
+            return statement.executeUpdate(sql);
+        } catch(Exception e) {
+            log.error(e.getMessage());
+            return 0;
+        } finally {
+            try {
+                if (statement != null)
+                    statement.close();
+                if(connection != null)
+                    connection.close();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
+    }
+
     public static Exception ExecuteCommand(Zone zone, String command) {
         try {
-            Session session = jsch.getSession(zone.getUsername(), zone.getIP(), Constant.SSH_PORT);
+            Session session = jsch.getSession(zone.getUsername(), zone.getIP(), SSH_PORT);
             session.setPassword(zone.getPassword());
             session.setConfig("StrictHostKeyChecking","no");
             session.setTimeout(6000);
@@ -61,7 +115,7 @@ public class Support {
 
     public static Exception SendFile(Zone zone, String srcPath, String destPath) {
         try {
-            Session session = jsch.getSession(zone.getUsername(), zone.getIP(), Constant.SSH_PORT);
+            Session session = jsch.getSession(zone.getUsername(), zone.getIP(), SSH_PORT);
             session.setPassword(zone.getPassword());
             session.setConfig("StrictHostKeyChecking","no");
             session.setTimeout(6000);

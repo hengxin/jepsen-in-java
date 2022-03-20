@@ -125,7 +125,7 @@ public class Controller {
         }
 
         log.info("Nemesis " + nemesis.Name() + " is running to " + ip + "...");
-        Exception exception = nemesis.Invoke(nemesisOperation.getZone());
+        Exception exception = nemesis.Invoke(nemesisOperation.getZone(), nemesisOperation.getInvokeArgs());
         if(exception != null)
             log.error("Run nemesis " + nemesis.Name() + " failed: " + exception.getMessage());
 
@@ -138,7 +138,7 @@ public class Controller {
         }
 
         log.info("Nemesis " + nemesis.Name() + " in "+ ip +" is recovering...");
-        exception = nemesis.Recover(nemesisOperation.getZone());        // TODO maybe retry it many times in a specific interval
+        exception = nemesis.Recover(nemesisOperation.getZone(), nemesisOperation.getRecoverArgs());        // TODO maybe retry it many times in a specific interval
         if(exception != null)
             log.error("Recover nemesis " + nemesis.Name() + " failed: " + exception.getMessage());
     }

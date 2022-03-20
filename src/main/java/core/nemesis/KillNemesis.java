@@ -6,25 +6,28 @@ import util.Support;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
+
+import static util.Constant.*;
 
 
 public class KillNemesis implements Nemesis {
     @Override
-    public Exception Invoke(Zone zone) {
+    public Exception Invoke(Zone zone, Map<String, String> invokeArgs) {
         String command = "pidof observer | xargs kill -STOP";
         return Support.ExecuteCommand(zone, command);
     }
 
     @Override
-    public Exception Recover(Zone zone) {
+    public Exception Recover(Zone zone, Map<String, String> recoverArgs) {
         String command = "pidof observer | xargs kill -CONT";
         return Support.ExecuteCommand(zone, command);
     }
 
     @Override
     public String Name() {
-        return KILL_NODE;
+        return NEMESIS_KILL_NODE;
     }
 }
 
@@ -38,15 +41,17 @@ class KillGenerator implements NemesisGenerator {
 
     @Override
     public ArrayList<NemesisOperation> Generate(ArrayList<Zone> zones) {
-        int n;
+        int n = 0;
         Duration duration = Duration.ofSeconds(8).plusSeconds(new Random().nextInt(5));
 //        Duration duration = Duration.ofMinutes(1).plusSeconds(new Random().nextInt(60));    // 默认至少一分钟最多两分钟
         switch (this.kind){
-            case "all_kill":
+            case NEMESIS_GENERATOR_ALL_KILL:
                 n = zones.size();
                 break;
-            default:        // random_kill
+            case NEMESIS_GENERATOR_RANDOM_KILL:
                 n = 1;
+                break;
+            default:
         }
         return this.KillNodes(zones, n, duration);
     }
@@ -64,7 +69,7 @@ class KillGenerator implements NemesisGenerator {
             n = length;
 
         for(int i = 0; i < n; i++)
-            operations.add(new NemesisOperation(Nemesis.KILL_NODE, zones.get(indices.get(i)), duration));
+            operations.add(new NemesisOperation(NEMESIS_KILL_NODE, zones.get(indices.get(i)), duration, null, null));
         return operations;
     }
 }

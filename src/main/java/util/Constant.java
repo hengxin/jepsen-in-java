@@ -1,27 +1,27 @@
 package util;
 
-import com.jcraft.jsch.*;
 import core.db.DB;
 import core.db.OceanbaseDB;
-import core.db.Zone;
 import core.nemesis.KillNemesis;
 import core.nemesis.Nemesis;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 
 @Slf4j
 public class Constant {
 
     public static final int SSH_PORT = 22;
 
-    public static final String RANDOM_KILL = "random_kill";
+    // All nemesis names
+    public static final String NEMESIS_KILL_NODE = "kill";
+    public static final String NEMESIS_PARTITION_NODE = "partition_network";
+
+    // All nemesis generator names
+    public static final String NEMESIS_GENERATOR_RANDOM_KILL = "random_kill";
+    public static final String NEMESIS_GENERATOR_ALL_KILL = "all_kill";
+    public static final String NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION = "symmetric_network_partition";
+
 
     public static HashMap<String, DB> DB_MAP = new HashMap<>();
     public static HashMap<String, Nemesis> NEMESIS_MAP = new HashMap<>();
