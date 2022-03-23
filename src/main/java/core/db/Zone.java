@@ -15,7 +15,7 @@ public class Zone {
     }
 
     public String getOceanBaseURL(){
-        return "jdbc:mysql://" + ip + ":" + port + "/oceanbase";
+        return "jdbc:mysql://" + ip + ":" + port + "/oceanbase?autoReconnect=true";
 //        return "jdbc:mysql://" + ip + ":" + port + "/oceanbase?connectTimeout=4000";
     }
 

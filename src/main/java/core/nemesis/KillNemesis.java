@@ -5,7 +5,6 @@ import util.Support;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 
@@ -53,23 +52,10 @@ class KillGenerator implements NemesisGenerator {
                 break;
             default:
         }
-        return this.KillNodes(zones, n, duration);
-    }
-
-    private ArrayList<NemesisOperation> KillNodes(ArrayList<Zone> zones, int n, Duration duration) {
+        ArrayList<Integer> shuffledIndices = Support.ShuffleByCount(zones.size());
         ArrayList<NemesisOperation> operations = new ArrayList<>();
-
-        // shuffle indices
-        int length = zones.size();
-        ArrayList<Integer> indices = new ArrayList<>();
-        for(int i = 0; i < length; i++)
-            indices.add(i);
-        Collections.shuffle(indices);       // 从后往前用一个随机数做index进行swap
-        if(n > length)
-            n = length;
-
         for(int i = 0; i < n; i++)
-            operations.add(new NemesisOperation(NEMESIS_KILL_NODE, zones.get(indices.get(i)), duration, null, null));
+            operations.add(new NemesisOperation(NEMESIS_KILL_NODE, zones.get(shuffledIndices.get(i)), duration, null, null));
         return operations;
     }
 }

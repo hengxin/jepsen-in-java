@@ -4,6 +4,7 @@ import core.db.DB;
 import core.db.OceanbaseDB;
 import core.nemesis.KillNemesis;
 import core.nemesis.Nemesis;
+import core.nemesis.PartitionNemesis;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class Constant {
     public static final String NEMESIS_GENERATOR_RANDOM_KILL = "random_kill";
     public static final String NEMESIS_GENERATOR_ALL_KILL = "all_kill";
     public static final String NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION = "symmetric_network_partition";
+    public static final String NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION = "asymmetric_network_partition";
 
 
     public static HashMap<String, DB> DB_MAP = new HashMap<>();
@@ -36,6 +38,8 @@ public class Constant {
         // Register Nemesis
         KillNemesis killNemesis = new KillNemesis();
         this.RegisterNemesis(killNemesis);
+        PartitionNemesis partitionNemesis = new PartitionNemesis();
+        this.RegisterNemesis(partitionNemesis);
     }
 
     public void RegisterDB(DB db) {

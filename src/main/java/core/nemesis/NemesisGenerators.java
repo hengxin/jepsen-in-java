@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 
+import static util.Constant.*;
+
 
 @Slf4j
 public class NemesisGenerators {
@@ -16,9 +18,11 @@ public class NemesisGenerators {
             switch (kind) {
                 case "":
                     continue;
-                case "random_kill": case "all_kill":
+                case NEMESIS_GENERATOR_RANDOM_KILL: case NEMESIS_GENERATOR_ALL_KILL:
                     generators.add(new KillGenerator(kind));
                     break;
+                case NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION: case NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION:
+                    generators.add(new PartitionGenerator(kind));
                 default:
                     log.warn("unknown kind generator");
             }

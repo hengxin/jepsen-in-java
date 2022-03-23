@@ -29,6 +29,7 @@ public class WriteClient extends Client {
                 String value = "IP." + sequence + " " + dateFormat.format(date);
                 String writeSQL = String.format("INSERT INTO t1 VALUES(\"%s\");", value);
                 statement.executeUpdate(writeSQL);
+                // TODO 使用support通用函数
                 // 这里如果不设置过期时间，节点数据库进程被stop 是会一直卡住直到进程恢复
                 log.info("Successfully add " + value);
             }

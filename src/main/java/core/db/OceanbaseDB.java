@@ -1,13 +1,7 @@
 package core.db;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import util.Constant;
 
-import java.io.InputStream;
 
 
 @Slf4j

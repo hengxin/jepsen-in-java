@@ -31,7 +31,8 @@ public class Entry {
         zones.add(new Zone("192.168.62.8", 2881, "root", "root"));
         zones.add(new Zone("192.168.62.9", 2881, "root", "root"));
         ControlConfig controlConfig = new ControlConfig("Oceanbase", zones, 3);
-        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
+//        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
+        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION);
         controller.Run();
     }
 
@@ -41,7 +42,7 @@ public class Entry {
         String[] hosts = {"192.168.62.6", "192.168.62.7", "192.168.62.8", "192.168.62.9"};
         String[] obcontrol = {"192.168.62.6"};
         String[] observers = {"192.168.62.7", "192.168.62.8", "192.168.62.9"};
-        String[] test_server = {"192.168.62.7"};
+        String[] test_server = {"192.168.62.8"};
 //        String command = "systemctl status firewalld.service";
 //        String command = "systemctl restart chronyd.service && chronyc tracking";
 //        String command = Constant.TxtToString("src/main/resources/centos8_mysql.txt");
@@ -49,8 +50,10 @@ public class Entry {
 //                "chronyc tracking";
 //        String command = "chronyc tracking && chronyc sources -v";
 //        String command = "systemctl status chronyd";
+        String command = "iptables -D INPUT 1\niptables -D INPUT 1";
 //        String command = "iptables -D INPUT 1";
-        String command = "iptables -I INPUT -s 192.168.0.0/24 -j DROP";
+//        String command = "iptables -I INPUT -s 192.168.62.7 -j DROP\n" +
+//                "iptables -I INPUT -s 192.168.62.9 -j DROP";
         for(String host: test_server) {
             try {
                 Support.ExecuteCommand(new Zone(host, 2881, "root", "root"), command);
@@ -70,21 +73,14 @@ public class Entry {
             String sql = "select svr_ip from gv$partition where role = 1 limit 1";      // role=1为主副本，role=2为从副本，这样看不同情况网络分区
             ResultSet rs = statement.executeQuery(sql);      // executeQuery用于select，executeUpdate用于create, insert, delete, update
 
-            statement.close();
-            connection.close();
-
             rs.next();
             String ip = rs.getString("svr_ip");
             System.out.println(ip);
 
-//            while (rs.next()) {
-//                String c1 = rs.getString("c1");
-//                System.out.println(c1);
-//            }
 
             rs.close();
-//            statement.close();
-//            connection.close();
+            statement.close();
+            connection.close();
         } catch(Exception e) {
             e.printStackTrace();
         }
