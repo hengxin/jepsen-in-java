@@ -23,6 +23,7 @@ public class NemesisGenerators {
                     break;
                 case NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION: case NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION:
                     generators.add(new PartitionGenerator(kind));
+                    break;
                 default:
                     log.warn("unknown kind generator");
             }

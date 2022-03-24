@@ -54,10 +54,12 @@ class PartitionGenerator implements NemesisGenerator {
     @Override
     public ArrayList<NemesisOperation> Generate(ArrayList<Zone> zones) {
         ArrayList<NemesisOperation> operations = new ArrayList<>();
-        Duration duration = Duration.ofSeconds(30).plusSeconds(new Random().nextInt(30));    // 默认至少一分钟最多两分钟
+        Duration duration = Duration.ofMinutes(4).plusSeconds(new Random().nextInt(30));    // 默认至少一分钟最多两分钟
         int size = zones.size();
         if(size == 0)
             return operations;
+        String leaderIP = CheckLeaderIP(zones.get(0));      // 随便一个zone都能用来查主
+        log.info("Leader ip is " + leaderIP + ".");
         ArrayList<Integer> shuffledIndices = Support.ShuffleByCount(size);
         Map<String, String> invokeArgs = new HashMap<>();
         Map<String, String> recoverArgs = new HashMap<>();
@@ -75,7 +77,6 @@ class PartitionGenerator implements NemesisGenerator {
             // leader <-x-> random one else
             case NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION:
                 Zone leaderZone = null;
-                String leaderIP = CheckLeaderIP(zones.get(0));      // 随便一个zone都能用来查主
                 String randomIP = "";
                 if(!leaderIP.equals("")) {
                     for(int i = 0; i < size && (leaderZone == null || randomIP.equals("")); i++) {

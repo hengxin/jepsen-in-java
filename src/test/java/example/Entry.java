@@ -31,8 +31,9 @@ public class Entry {
         zones.add(new Zone("192.168.62.8", 2881, "root", "root"));
         zones.add(new Zone("192.168.62.9", 2881, "root", "root"));
         ControlConfig controlConfig = new ControlConfig("Oceanbase", zones, 3);
-//        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
-        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION);
+        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
+//        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION);
+//        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
         controller.Run();
     }
 
@@ -42,19 +43,19 @@ public class Entry {
         String[] hosts = {"192.168.62.6", "192.168.62.7", "192.168.62.8", "192.168.62.9"};
         String[] obcontrol = {"192.168.62.6"};
         String[] observers = {"192.168.62.7", "192.168.62.8", "192.168.62.9"};
-        String[] test_server = {"192.168.62.8"};
+        String[] test_server = {"192.168.62.9"};
 //        String command = "systemctl status firewalld.service";
-//        String command = "systemctl restart chronyd.service && chronyc tracking";
+        String command = "systemctl restart chronyd.service && chronyc tracking";
 //        String command = Constant.TxtToString("src/main/resources/centos8_mysql.txt");
 //        String command = "timedatectl set-ntp true\n" +
 //                "chronyc tracking";
 //        String command = "chronyc tracking && chronyc sources -v";
 //        String command = "systemctl status chronyd";
-        String command = "iptables -D INPUT 1\niptables -D INPUT 1";
+//        String command = "iptables -D INPUT 1\niptables -D INPUT 1";
 //        String command = "iptables -D INPUT 1";
 //        String command = "iptables -I INPUT -s 192.168.62.7 -j DROP\n" +
 //                "iptables -I INPUT -s 192.168.62.9 -j DROP";
-        for(String host: test_server) {
+        for(String host: observers) {
             try {
                 Support.ExecuteCommand(new Zone(host, 2881, "root", "root"), command);
             } catch (Exception e) {
@@ -66,7 +67,7 @@ public class Entry {
     @Test
     public void JDBC() {
         try {
-            String host = "192.168.62.9";
+            String host = "192.168.62.8";
             Connection connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + 2881 + "/oceanbase", "root", "root");
             Statement statement = connection.createStatement();
 //            String sql = "select * from t;";
@@ -84,5 +85,14 @@ public class Entry {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void TestShuffle() {
+        int n = 3;
+        ArrayList<Integer> arrayList = Support.ShuffleByCount(n);
+        for(Integer integer: arrayList)
+            System.out.print(integer + " ");
+        System.out.println();
     }
 }
