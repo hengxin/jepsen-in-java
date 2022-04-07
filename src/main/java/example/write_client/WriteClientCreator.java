@@ -1,4 +1,4 @@
-package example;
+package example.write_client;
 
 import core.client.Client;
 import core.client.ClientCreator;
@@ -8,6 +8,6 @@ public class WriteClientCreator implements ClientCreator {
 
     @Override
     public Client Create(Zone zone) {
-        return new WriteClient(Integer.parseInt(zone.getIP().split("\\.")[3]));
+        return new WriteClient(Integer.parseInt(zone.getIp().split("\\.")[3]),2000);
     }
 }

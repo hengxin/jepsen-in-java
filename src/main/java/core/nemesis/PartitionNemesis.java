@@ -6,10 +6,13 @@ import util.Support;
 
 import java.sql.ResultSet;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 import java.util.function.Function;
-import static util.Constant.*;
 
+import static util.Constant.*;
 
 
 public class PartitionNemesis implements Nemesis {
@@ -54,7 +57,7 @@ class PartitionGenerator implements NemesisGenerator {
     @Override
     public ArrayList<NemesisOperation> Generate(ArrayList<Zone> zones) {
         ArrayList<NemesisOperation> operations = new ArrayList<>();
-        Duration duration = Duration.ofMinutes(4).plusSeconds(new Random().nextInt(30));    // 默认至少一分钟最多两分钟
+        Duration duration = Duration.ofMinutes(3).plusSeconds(new Random().nextInt(30));
         int size = zones.size();
         if(size == 0)
             return operations;
@@ -69,7 +72,7 @@ class PartitionGenerator implements NemesisGenerator {
                 Zone selectedZone = zones.get(shuffledIndices.get(0));
                 StringBuilder otherIPs = new StringBuilder();
                 for(int i = 1; i < size; i++)
-                    otherIPs.append(zones.get(shuffledIndices.get(i)).getIP()).append(" ");
+                    otherIPs.append(zones.get(shuffledIndices.get(i)).getIp()).append(" ");
                 invokeArgs.put(PartitionNemesis.OTHER_IPS, otherIPs.toString().strip());
                 recoverArgs.put(PartitionNemesis.OTHER_ZONES_COUNT, String.valueOf(size - 1));
                 operations.add(new NemesisOperation(NEMESIS_PARTITION_NODE, selectedZone, duration, invokeArgs, recoverArgs));
@@ -81,10 +84,10 @@ class PartitionGenerator implements NemesisGenerator {
                 if(!leaderIP.equals("")) {
                     for(int i = 0; i < size && (leaderZone == null || randomIP.equals("")); i++) {
                         Zone zone = zones.get(shuffledIndices.get(i));
-                        if(zone.getIP().equals(leaderIP))
+                        if(zone.getIp().equals(leaderIP))
                             leaderZone = zone;
                         else if(randomIP.equals(""))
-                            randomIP = zone.getIP();
+                            randomIP = zone.getIp();
                     }
                     invokeArgs.put(PartitionNemesis.OTHER_IPS, randomIP);
                     recoverArgs.put(PartitionNemesis.OTHER_ZONES_COUNT, String.valueOf(1));
@@ -107,6 +110,6 @@ class PartitionGenerator implements NemesisGenerator {
                 return "";
             }
         };
-        return Support.JDBCQuery(zone, sql, handle);
+        return Support.JDBCQueryWithZone(zone, sql, handle);
     }
 }

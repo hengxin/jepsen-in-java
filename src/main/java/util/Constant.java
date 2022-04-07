@@ -29,6 +29,7 @@ public class Constant {
     public static HashMap<String, Nemesis> NEMESIS_MAP = new HashMap<>();
 
 
+
     public void Init() {
         // Register DB
         OceanbaseDB oceanbaseDB = new OceanbaseDB();

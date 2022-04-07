@@ -1,6 +1,5 @@
 package core.control;
 
-import com.jcraft.jsch.Session;
 import core.db.Zone;
 
 import java.util.ArrayList;

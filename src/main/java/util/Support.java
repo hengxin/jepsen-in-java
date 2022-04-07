@@ -1,6 +1,7 @@
 package util;
 
 import com.jcraft.jsch.*;
+import core.client.Client;
 import core.db.Zone;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -52,7 +53,7 @@ public class Support {
     }
 
     // executeQuery用于select
-    public static String JDBCQuery(Zone zone, String sql, Function<ResultSet, String> handle) {
+    public static String JDBCQueryWithZone(Zone zone, String sql, Function<ResultSet, String> handle) {
         Connection connection = null;
         Statement statement = null;
         try {
@@ -75,23 +76,48 @@ public class Support {
         }
     }
 
-    // executeUpdate用于create, insert, delete, update
-    public static int JDBCUpdate(Zone zone, String sql) {
-        Connection connection = null;
+    // TODO 合并一下
+    // executeQuery用于select
+    public static <T> T JDBCQueryWithClient(Client client, String selectSQL, Function<ResultSet, T> handle) {
+        if(client.getConnection() == null)
+            return null;
+        Connection connection = client.getConnection();
         Statement statement = null;
         try {
-            connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
             statement = connection.createStatement();
-            return statement.executeUpdate(sql);
+            ResultSet rs = statement.executeQuery(selectSQL);
+            return handle.apply(rs);
         } catch(Exception e) {
             log.error(e.getMessage());
-            return 0;
+            return null;
         } finally {
             try {
                 if (statement != null)
                     statement.close();
-                if(connection != null)
-                    connection.close();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
+    }
+
+    // executeUpdate用于create, insert, delete, update
+    public static Exception JDBCUpdate(Client client, String allSQL) {
+        if(client.getConnection() == null)
+            return new Exception("Client's connection is null!");
+        Connection connection = client.getConnection();
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            for(String sql: allSQL.split(";"))
+                statement.executeUpdate(sql + ";");
+            return null;
+        } catch(Exception e) {
+            log.error(e.getMessage());
+            return e;
+        } finally {
+            try {
+                if (statement != null)
+                    statement.close();
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -100,7 +126,7 @@ public class Support {
 
     public static Exception ExecuteCommand(Zone zone, String command) {
         try {
-            Session session = jsch.getSession(zone.getUsername(), zone.getIP(), SSH_PORT);
+            Session session = jsch.getSession(zone.getUsername(), zone.getIp(), SSH_PORT);
             session.setPassword(zone.getPassword());
             session.setConfig("StrictHostKeyChecking","no");
             session.setTimeout(6000);
@@ -126,7 +152,7 @@ public class Support {
 
     public static Exception SendFile(Zone zone, String srcPath, String destPath) {
         try {
-            Session session = jsch.getSession(zone.getUsername(), zone.getIP(), SSH_PORT);
+            Session session = jsch.getSession(zone.getUsername(), zone.getIp(), SSH_PORT);
             session.setPassword(zone.getPassword());
             session.setConfig("StrictHostKeyChecking","no");
             session.setTimeout(6000);

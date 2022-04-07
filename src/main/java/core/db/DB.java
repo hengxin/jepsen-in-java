@@ -1,8 +1,6 @@
 package core.db;
 
 
-import java.util.HashMap;
-
 public interface DB {
     // SetUp initializes the database.
     Exception SetUp(Zone zone);
