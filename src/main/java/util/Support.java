@@ -1,8 +1,13 @@
 package util;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.*;
 import core.client.Client;
+import core.client.ClientInvokeResponse;
 import core.db.Zone;
+import core.record.ActionEnum;
+import core.record.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
@@ -43,6 +48,25 @@ public class Support {
         }
     }
 
+
+    // 用户自定义的Operation的request类型传进来
+    public static ArrayList<Operation> TxtToOperations(String filePath, Class requestClass) {
+        ArrayList<Operation> operations = new ArrayList<>();
+        String content = TxtToString(filePath);
+        if(content.equals(""))
+            return operations;
+        String[] strings = content.split("\n");
+        for(String str: strings) {
+            Operation operation = JSONObject.parseObject(str, Operation.class);     // 在这里data会被反序列化成JsonObject类型
+            if(operation.getAction() == ActionEnum.InvokeOperation)
+                operation.setData(JSONObject.parseObject(JSON.toJSONString(operation.getData()), requestClass));
+            else
+                operation.setData(JSONObject.parseObject(JSON.toJSONString(operation.getData()), ClientInvokeResponse.class));
+            operations.add(operation);
+        }
+        return operations;
+    }
+
     public static ArrayList<Integer> ShuffleByCount(int length) {
         // shuffle indices
         ArrayList<Integer> indices = new ArrayList<>();
@@ -53,7 +77,7 @@ public class Support {
     }
 
     // executeQuery用于select
-    public static String JDBCQueryWithZone(Zone zone, String sql, Function<ResultSet, String> handle) {
+    public static <T> T JDBCQueryWithZone(Zone zone, String sql, Function<ResultSet, T> handle) {
         Connection connection = null;
         Statement statement = null;
         try {
@@ -63,7 +87,7 @@ public class Support {
             return handle.apply(rs);
         } catch(Exception e) {
             log.error(e.getMessage());
-            return "";
+            return null;
         } finally {
             try {
                 if (statement != null)
@@ -78,6 +102,7 @@ public class Support {
 
     // TODO 合并一下
     // executeQuery用于select
+    // Attention: maybe return is null!!!
     public static <T> T JDBCQueryWithClient(Client client, String selectSQL, Function<ResultSet, T> handle) {
         if(client.getConnection() == null)
             return null;

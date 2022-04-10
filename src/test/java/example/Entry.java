@@ -1,7 +1,5 @@
 package example;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import core.client.ClientInvokeResponse;
 import core.control.ControlConfig;
 import core.control.Controller;
@@ -10,9 +8,9 @@ import core.model.ModelStepResponse;
 import core.record.Operation;
 import core.record.Recorder;
 import example.bank.BankClientCreator;
-import example.write_client.WriteClient;
-import example.write_client.WriteClientCreator;
-import example.write_client.WriteClientModel;
+import example.write_client.RWRequest;
+import example.write_client.ReadAndWriteClientCreator;
+import example.write_client.ReadAndWriteClientModel;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import util.Constant;
@@ -48,16 +46,16 @@ public class Entry {
     }
 
     @Test
-    public void WriteClientMainTest() {
+    public void ReadAndWriteClientMainTest() {
         constant.Init();
         ArrayList<Zone> zones = new ArrayList<>();
         zones.add(new Zone("192.168.62.7", 2881, "root", "root"));
         zones.add(new Zone("192.168.62.8", 2881, "root", "root"));
         zones.add(new Zone("192.168.62.9", 2881, "root", "root"));
-        Recorder recorder = new Recorder("output/write_client/", "history1.txt");
+        Recorder recorder = new Recorder("output/read_write_client/", "history1.txt");
         ControlConfig controlConfig = new ControlConfig("Oceanbase", zones, 3);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
-        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
+        Controller controller = new Controller(controlConfig, new ReadAndWriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
         controller.Run();
     }
@@ -68,7 +66,7 @@ public class Entry {
         String[] hosts = {"192.168.62.6", "192.168.62.7", "192.168.62.8", "192.168.62.9"};
         String[] obcontrol = {"192.168.62.6"};
         String[] observers = {"192.168.62.7", "192.168.62.8", "192.168.62.9"};
-        String[] test_server = {"192.168.62.7"};
+        String[] test_server = {"192.168.62.8"};
 //        String command = "systemctl status firewalld.service";
         String command = "systemctl restart chronyd.service && chronyc tracking";
 //        String command = Constant.TxtToString("src/main/resources/centos8_mysql.txt");
@@ -114,24 +112,17 @@ public class Entry {
 
     @Test
     public void TestCheck() {
-        String content = Support.TxtToString("build/record/write_client_history_1.txt");
-        String[] list = content.split("\n");
-        try {
-            Operation<?> invokeOperation = JSONObject.parseObject(list[1], Operation.class);
-            Operation<ClientInvokeResponse<?>> responseOperation = JSONObject.parseObject(list[3], Operation.class);       // 在这里response的data会被反序列化成JsonObject
-            // TODO 这里的处理可以优化
-            responseOperation.setData(JSONObject.parseObject(JSON.toJSONString(responseOperation.getData()), ClientInvokeResponse.class));
-            WriteClientModel model = new WriteClientModel();
-            ModelStepResponse<?> response = model.Step(0, invokeOperation.getData(), responseOperation.getData());
-            System.out.println(response.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ArrayList<Operation> operations = Support.TxtToOperations("output/read_write_client/history1.txt", RWRequest.class);
+        ReadAndWriteClientModel model = new ReadAndWriteClientModel();
+        ModelStepResponse<?> response = model.Step(0, operations.get(1).getData(), (ClientInvokeResponse<?>) operations.get(3).getData());
+        System.out.println(response.toString());
     }
 
     @Test
     public void Test() {
-        WriteClient client = new WriteClient(1,3);
-        client.log();
+        Object x = 2;
+        System.out.println(x);
+        x = "f";
+        System.out.println(x);
     }
 }

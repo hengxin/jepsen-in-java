@@ -57,7 +57,7 @@ class PartitionGenerator implements NemesisGenerator {
     @Override
     public ArrayList<NemesisOperation> Generate(ArrayList<Zone> zones) {
         ArrayList<NemesisOperation> operations = new ArrayList<>();
-        Duration duration = Duration.ofMinutes(3).plusSeconds(new Random().nextInt(30));
+        Duration duration = Duration.ofMinutes(2).plusSeconds(new Random().nextInt(30));
         int size = zones.size();
         if(size == 0)
             return operations;

@@ -14,7 +14,7 @@ public class ReadAndWriteClientModel implements Model {
     @Override
     public ModelStepResponse<?> Step(Object oldState, Object input, ClientInvokeResponse<?> output) {
         Integer x = (Integer) oldState;
-        rwRequest rwRequest = (rwRequest) input;
+        RWRequest rwRequest = (RWRequest) input;
         if(!output.isSuccess())
             return new ModelStepResponse<>(true, x);
         if(rwRequest.getAction().equals("read")) {

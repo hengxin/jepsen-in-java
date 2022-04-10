@@ -2,8 +2,6 @@ package example.write_client;
 
 import core.client.Client;
 import core.client.ClientInvokeResponse;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import util.Support;
 
@@ -33,16 +31,16 @@ public class ReadAndWriteClient extends Client {
     public Object NextRequest() {
         float f = random.nextFloat();
         if(f <= 0.5) {
-            return new rwRequest("read", "x", 0);
+            return new RWRequest("read", "x", 0);
         } else {
             int nextValue = random.nextInt(100);
-            return new rwRequest("write", "x", nextValue);
+            return new RWRequest("write", "x", nextValue);
         }
     }
 
     @Override
     public ClientInvokeResponse<?> Invoke(Object request) {
-        rwRequest rwRequest = (rwRequest) request;
+        RWRequest rwRequest = (RWRequest) request;
         if(rwRequest.getAction().equals("read")) {
             String readSQL = "SELECT value FROM t WHERE `name` = \"%s\";";
             Function<ResultSet, Integer> handle = (ResultSet rs) -> {
@@ -74,13 +72,4 @@ public class ReadAndWriteClient extends Client {
         String dropSQL = "DROP TABLE t;";          // 注意分号
         return Support.JDBCUpdate(this, dropSQL);
     }
-}
-
-
-@Data
-@AllArgsConstructor
-class rwRequest {
-    String action;
-    String name;
-    int value;
 }
