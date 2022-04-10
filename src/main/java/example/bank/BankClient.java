@@ -53,7 +53,8 @@ public class BankClient extends Client {
         int toId = transferRequest.getToId();
         int transferMoney = transferRequest.getTransferMoney();
 
-        String selectSQLFormat = "SELECT money from bank where id = %s";
+        // check money and lock row before real transfer
+        String selectSQLFormat = "SELECT money FROM bank WHERE id = %s FOR UPDATE";
         Function<ResultSet, Integer> handle = (ResultSet rs) -> {
             try {
                 rs.next();
@@ -63,24 +64,22 @@ public class BankClient extends Client {
                 return null;
             }
         };
-        // check money before real transfer
         Integer fromMoneyInFact = Support.JDBCQueryWithClient(this, String.format(selectSQLFormat, fromId), handle);
         Integer toMoneyInFact = Support.JDBCQueryWithClient(this, String.format(selectSQLFormat, toId), handle);
         if(fromMoneyInFact == null || toMoneyInFact == null || fromMoneyInFact - transferMoney < 0)
             return new ClientInvokeResponse<>(false, this.accounts);
+        this.accounts.get(fromId).setMoney(fromMoneyInFact - transferMoney);
+        this.accounts.get(toId).setMoney(toMoneyInFact + transferMoney);
 
-        int fromMoneyFinal = fromMoneyInFact - transferMoney;
-        int toMoneyFinal = toMoneyInFact + transferMoney;
-        String transferSQLFormat = "UPDATE bank SET money = %s where id = %s;";
-        String transferSQL1 = String.format(transferSQLFormat, fromMoneyFinal, fromId);
-        String transferSQL2 = String.format(transferSQLFormat, toMoneyFinal, toId);
+
+        String transferSQLFormat = "UPDATE bank SET money = money + %s WHERE id = %s and money >= %s;";
+        String transferSQL1 = String.format(transferSQLFormat, -transferMoney, fromId, transferMoney);
+        String transferSQL2 = String.format(transferSQLFormat, transferMoney, toId, 0);
         Exception exception = Support.JDBCUpdate(this, transferSQL1 + transferSQL2);
-        if(exception == null){
-            this.accounts.get(fromId).setMoney(fromMoneyFinal);
-            this.accounts.get(toId).setMoney(toMoneyFinal);
+        if(exception == null)
             return new ClientInvokeResponse<>(true, this.accounts);
-        }
         else return new ClientInvokeResponse<>(false, this.accounts);
+        // TODO bank transfer的例子不好 如果想用model.step这种 只能一个client 很蠢 不然在运行过程中没法保存before和after的值，查了也会被其他client改变
     }
 
     @Override

@@ -12,6 +12,6 @@ public class BankClientCreator implements ClientCreator {
         ArrayList<Account> accounts = new ArrayList<>();
         accounts.add(new Account(0, 200));
         accounts.add(new Account(1, 300));
-        return new BankClient(1000, accounts);
+        return new BankClient(3, accounts);     // TODO modify
     }
 }

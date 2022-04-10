@@ -4,10 +4,10 @@ import core.client.Client;
 import core.client.ClientCreator;
 import core.db.Zone;
 
-public class WriteClientCreator implements ClientCreator {
+public class ReadAndWriteClientCreator implements ClientCreator {
 
     @Override
     public Client Create(Zone zone) {
-        return new WriteClient(Integer.parseInt(zone.getIp().split("\\.")[3]),2000);
+        return new ReadAndWriteClient(2000);
     }
 }
