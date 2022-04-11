@@ -1,6 +1,0 @@
-; 下面的命令手动在obd机器执行【前提是把两个文件传过去了】
-ssh-keygen -t rsa
-chmod u+x scp.sh
-chmod u+x ssh.sh
-./scp.sh ~/.ssh/id_rsa.pub ~/.ssh/
-./ssh.sh "cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys"

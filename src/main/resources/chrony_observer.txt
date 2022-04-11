@@ -1,7 +1,0 @@
-cat /etc/chrony.conf
-sed -i "s/pool 2.centos.pool.ntp.org iburst/server 192.168.62.6 iburst/g" /etc/chrony.conf
-cat /etc/chrony.conf
-
-systemctl restart chronyd.service && systemctl enable chronyd.service --now
-
-timedatectl set-ntp true

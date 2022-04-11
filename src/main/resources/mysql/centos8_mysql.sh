@@ -1,3 +1,6 @@
+# /usr/bin/bash
+
+# ATTENTION: send mysql-community.repo first!
 dnf -y remove @mysql
 dnf -y module reset mysql
 dnf -y module disable mysql

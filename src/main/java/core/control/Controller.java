@@ -45,6 +45,7 @@ public class Controller {
 
     public void Run() {
 
+        // TODO 这里的异常选择怎样处理
         SetUpDB();
         SetUpClient();
 
@@ -75,7 +76,7 @@ public class Controller {
     }
 
     private void SetUpDB() {
-        DB db = Constant.GetDB(this.config.getDBName());
+        DB db = Constant.GetDB(this.config.getDbName());
         if(db == null)
             return;
         for(Zone zone: this.config.getZones()) {
@@ -83,6 +84,7 @@ public class Controller {
             if(exception != null)
                 log.error(exception.getMessage());
         }
+        db.SetConfig(this.config.getZones());
     }
 
     private void SetUpClient() {

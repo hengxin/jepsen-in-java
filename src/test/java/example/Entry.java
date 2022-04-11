@@ -69,7 +69,7 @@ public class Entry {
         String[] test_server = {"192.168.62.8"};
 //        String command = "systemctl status firewalld.service";
         String command = "systemctl restart chronyd.service && chronyc tracking";
-//        String command = Constant.TxtToString("src/main/resources/centos8_mysql.txt");
+//        String command = Constant.TxtToString("src/main/resources/centos8_mysql.sh");
 //        String command = "timedatectl set-ntp true\n" +
 //                "chronyc tracking";
 //        String command = "chronyc tracking && chronyc sources -v";
