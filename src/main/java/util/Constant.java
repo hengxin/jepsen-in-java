@@ -1,5 +1,6 @@
 package util;
 
+import core.db.Cassandra;
 import core.db.DB;
 import core.db.OceanbaseDB;
 import core.nemesis.KillNemesis;
@@ -34,6 +35,8 @@ public class Constant {
         // Register DB
         OceanbaseDB oceanbaseDB = new OceanbaseDB();
         this.RegisterDB(oceanbaseDB);
+        Cassandra cassandra = new Cassandra();
+        this.RegisterDB(cassandra);
 
 
         // Register Nemesis

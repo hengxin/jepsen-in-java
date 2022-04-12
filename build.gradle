@@ -34,6 +34,9 @@ dependencies {
 
     implementation 'com.alibaba:fastjson:1.2.73'
 
+    implementation 'com.datastax.cassandra:cassandra-driver-core:3.4.0'
+    implementation 'com.datastax.cassandra:cassandra-driver-mapping:3.4.0'
+
 
     compile fileTree(dir:'libs',include:['*.jar'])
 }

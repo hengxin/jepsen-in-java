@@ -7,7 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class Zone {
     private String ip;
-    private int port;
+    private int port;               // TODO 这个现在是oceanbase的2881 后面可能要修改
     private String username;        // mysql的，租户用
     private String password;
 

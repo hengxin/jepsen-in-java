@@ -1,9 +1,10 @@
 package core.db;
 
 import lombok.extern.slf4j.Slf4j;
-import util.Support;
 
 import java.util.ArrayList;
+
+import static util.Support.*;
 
 
 @Slf4j
@@ -26,7 +27,7 @@ public class OceanbaseDB implements DB {
     }
 
     @Override
-    public Exception SetConfig(ArrayList<Zone> zones) {
+    public Exception SetConfig(ArrayList<Zone> zones) {         // TODO 这里还没整体测 但用的都是之前可以用的东西
         if(zones.size() == 0)
             return new Exception("Zones is empty");
         String obcontrol = zones.get(0).getIp();            // 默认第一个节点为obcontrol
@@ -46,25 +47,23 @@ public class OceanbaseDB implements DB {
     }
 
     private void BasicConfig(ArrayList<Zone> zones, String obcontrol, String observer) {
-        String executeConfig = "chmod u+x /root/obconfig.sh\n" +
-                "/root/obconfig.sh " + obcontrol + " " + observer;
         for(Zone zone: zones) {
-            Exception exception = Support.SendFile(zone, "src/main/resources/oceanbase/obconfig.sh", "/root/");
+            Exception exception = SendFile(zone, "src/main/resources/oceanbase/obconfig.sh", "/root/");
             if(exception != null)
                 log.error(exception.getMessage());
-            exception = Support.ExecuteCommand(zone, executeConfig);
+            exception = ExecuteCommand(zone, ShellCommand("/root/obconfig.sh", obcontrol + " " + observer));
             if(exception != null)
                 log.error(exception.getMessage());
 
 
             // download mysql for tenant
-            exception = Support.SendFile(zone, "src/main/resources/mysql/mysql-community.repo", "/etc/yum.repos.d/");
+            exception = SendFile(zone, "src/main/resources/mysql/mysql-community.repo", "/etc/yum.repos.d/");
             if(exception != null)
                 log.error(exception.getMessage());
-            exception = Support.SendFile(zone, "src/main/resources/mysql/centos8_mysql.sh", "/root/");
+            exception = SendFile(zone, "src/main/resources/mysql/centos8_mysql.sh", "/root/");
             if(exception != null)
                 log.error(exception.getMessage());
-            exception = Support.ExecuteCommand(zone, "/root/centos8_mysql.sh");
+            exception = ExecuteCommand(zone, ShellCommand("/root/centos8_mysql.sh", ""));
             if(exception != null)
                 log.error(exception.getMessage());
         }
@@ -74,18 +73,18 @@ public class OceanbaseDB implements DB {
         for(int i = 0; i < zones.size(); i++) {
             Zone zone = zones.get(i);
             if(i == 0) {
-                Exception exception = Support.SendFile(zone, "src/main/resources/oceanbase/obcontrol_chrony.sh", "/root/");
+                Exception exception = SendFile(zone, "src/main/resources/oceanbase/obcontrol_chrony.sh", "/root/");
                 if(exception != null)
                     log.error(exception.getMessage());
-                exception = Support.ExecuteCommand(zone, "/root/obcontrol_chrony.sh");
+                exception = ExecuteCommand(zone, ShellCommand("/root/obcontrol_chrony.sh", ""));
                 if(exception != null)
                     log.error(exception.getMessage());
             }
             else {
-                Exception exception = Support.SendFile(zone, "src/main/resources/oceanbase/observer_chrony.sh", "/root/");
+                Exception exception = SendFile(zone, "src/main/resources/oceanbase/observer_chrony.sh", "/root/");
                 if(exception != null)
                     log.error(exception.getMessage());
-                exception = Support.ExecuteCommand(zone, "/root/observer_chrony.sh " + obcontrol);
+                exception = ExecuteCommand(zone, ShellCommand("/root/observer_chrony.sh", obcontrol));
                 if(exception != null)
                     log.error(exception.getMessage());
             }
@@ -93,29 +92,29 @@ public class OceanbaseDB implements DB {
     }
 
     private void SSH(Zone controlZone) {
-        Exception exception = Support.SendFile(controlZone, "src/main/resources/ssh/scp.sh", "/root/");
+        Exception exception = SendFile(controlZone, "src/main/resources/ssh/scp.sh", "/root/");
         if(exception != null)
             log.error(exception.getMessage());
-        exception = Support.SendFile(controlZone, "src/main/resources/ssh/ssh.sh", "/root/");
+        exception = SendFile(controlZone, "src/main/resources/ssh/ssh.sh", "/root/");
         if(exception != null)
             log.error(exception.getMessage());
-        exception = Support.SendFile(controlZone, "src/main/resources/ssh/ssh_control.sh", "/root/");
+        exception = SendFile(controlZone, "src/main/resources/ssh/ssh_control.sh", "/root/");
         if(exception != null)
             log.error(exception.getMessage());
-        exception = Support.ExecuteCommand(controlZone, "/root/ssh_control.sh");
+        exception = ExecuteCommand(controlZone, ShellCommand("/root/ssh_control.sh", ""));
         if(exception != null)
             log.error(exception.getMessage());
     }
 
     private void OBD(Zone controlZone) {
         // TODO 根据obcontrol和observer修改配置文件 或者这个就直接丢给用户自己改去
-        Exception exception = Support.SendFile(controlZone, "src/main/resources/oceanbase/mini-distributed-example.yaml", "/root/");
+        Exception exception = SendFile(controlZone, "src/main/resources/oceanbase/mini-distributed-example.yaml", "/root/");
         if(exception != null)
             log.error(exception.getMessage());
-        exception = Support.SendFile(controlZone, "src/main/resources/oceanbase/obcontrol_obd.sh", "/root/");
+        exception = SendFile(controlZone, "src/main/resources/oceanbase/obcontrol_obd.sh", "/root/");
         if(exception != null)
             log.error(exception.getMessage());
-        exception = Support.ExecuteCommand(controlZone, "/root/obcontrol_obd.sh");
+        exception = ExecuteCommand(controlZone, ShellCommand("/root/obcontrol_obd.sh", ""));
         if(exception != null)
             log.error(exception.getMessage());
     }
