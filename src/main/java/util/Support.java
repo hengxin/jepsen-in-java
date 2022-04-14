@@ -149,6 +149,10 @@ public class Support {
         }
     }
 
+    public static String ShellCommand(String shell_path, String args) {
+        return "chmod u+x " + shell_path + "\n" + shell_path + " " + args;
+    }
+
     public static Exception ExecuteCommand(Zone zone, String command) {
         try {
             Session session = jsch.getSession(zone.getUsername(), zone.getIp(), SSH_PORT);

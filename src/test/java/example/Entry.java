@@ -1,8 +1,13 @@
 package example;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
 import core.client.ClientInvokeResponse;
 import core.control.ControlConfig;
 import core.control.Controller;
+import core.db.Cassandra;
 import core.db.Zone;
 import core.model.ModelStepResponse;
 import core.record.Operation;
@@ -16,10 +21,6 @@ import org.junit.jupiter.api.Test;
 import util.Constant;
 import util.Support;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import static util.Constant.NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION;
@@ -68,7 +69,7 @@ public class Entry {
         String[] observers = {"192.168.62.7", "192.168.62.8", "192.168.62.9"};
         String[] test_server = {"192.168.62.8"};
 //        String command = "systemctl status firewalld.service";
-        String command = "systemctl restart chronyd.service && chronyc tracking";
+//        String command = "systemctl restart chronyd.service && chronyc tracking";
 //        String command = Constant.TxtToString("src/main/resources/centos8_mysql.sh");
 //        String command = "timedatectl set-ntp true\n" +
 //                "chronyc tracking";
@@ -78,35 +79,13 @@ public class Entry {
 //        String command = "iptables -D INPUT 1";
 //        String command = "iptables -I INPUT -s 192.168.62.7 -j DROP\n" +
 //                "iptables -I INPUT -s 192.168.62.9 -j DROP";
+        String command = "rm -rf /var/lib/cassandra/data\nsystemctl restart cassandra";
         for(String host: observers) {
             try {
                 Support.ExecuteCommand(new Zone(host, 2881, "root", "root"), command);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    @Test
-    public void JDBC() {
-        try {
-            String host = "192.168.62.8";
-            Connection connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + 2881 + "/oceanbase", "root", "root");
-            Statement statement = connection.createStatement();
-//            String sql = "select * from t;";
-            String sql = "select svr_ip from gv$partition where role = 1 limit 1";      // role=1为主副本，role=2为从副本，这样看不同情况网络分区
-            ResultSet rs = statement.executeQuery(sql);      // executeQuery用于select，executeUpdate用于create, insert, delete, update
-
-            rs.next();
-            String ip = rs.getString("svr_ip");
-            System.out.println(ip);
-
-
-            rs.close();
-            statement.close();
-            connection.close();
-        } catch(Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -120,9 +99,24 @@ public class Entry {
 
     @Test
     public void Test() {
-        Object x = 2;
-        System.out.println(x);
-        x = "f";
-        System.out.println(x);
+        ArrayList<Zone> zones = new ArrayList<>();
+        zones.add(new Zone("192.168.62.7", 2881, "root", "root"));
+        zones.add(new Zone("192.168.62.8", 2881, "root", "root"));
+        zones.add(new Zone("192.168.62.9", 2881, "root", "root"));
+        Cassandra cassandra = new Cassandra();
+//        for(Zone zone: zones)
+//            cassandra.SetUp(zone);
+        cassandra.SetConfig(zones);
+    }
+
+    @Test
+    public void CassandraDemo() {
+        Cluster cluster = Cluster.builder().addContactPoint("192.168.62.7").withPort(9042).build();
+        Session session = cluster.connect();
+        ResultSet rs = session.execute("select release_version from system.local");
+        Row row = rs.one();
+        System.out.println("RELEASE VERSION: " + row.getString("release_version"));
+        session.close();
+        cluster.close();
     }
 }

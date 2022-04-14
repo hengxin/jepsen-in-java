@@ -42,6 +42,9 @@ dependencies {
     implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.3'
     implementation group: 'us.bpsm', name: 'edn-java', version: '0.7.1'
 
+    implementation 'com.datastax.cassandra:cassandra-driver-core:3.4.0'
+    implementation 'com.datastax.cassandra:cassandra-driver-mapping:3.4.0'
+
 
     compile fileTree(dir:'libs',include:['*.jar'])
 }

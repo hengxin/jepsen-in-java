@@ -15,5 +15,8 @@ mysql -u root -e "update mysql.user set authentication_string = password('root')
 mysql -u root -e "update mysql.user set host = '%' where user = 'root'"
 mysql -u root -e "update mysql.user set password_expired='N'"
 mysql -u root -e "flush privileges"
+
+# 删除最后一行
 sed -i '$d' /etc/my.cnf
+
 service mysqld restart
