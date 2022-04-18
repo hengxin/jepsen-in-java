@@ -1,17 +1,15 @@
 package core.checker.checker;
 
+import core.checker.model.Model;
 import core.checker.util.OpUtil;
 import core.checker.vo.Result;
-import core.checker.model.Model;
 import lombok.extern.slf4j.Slf4j;
-import util.ClojureCaller;
 import util.Util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 public class CheckerUtil {
@@ -46,7 +44,7 @@ public class CheckerUtil {
      */
     public Result checkSafe(Checker checker, Map test, List<Operation> history, Map opts) {
         try {
-            return checker.check(test, history, opts);
+            return checker.check(test, new ArrayList<>(history), opts);
         } catch (Exception e) {
             log.warn("Error while checking history: " + e);
             StringWriter sw = new StringWriter();
@@ -148,29 +146,29 @@ public class CheckerUtil {
      * @param e SetFullElement
      * @return a map of final results
      */
-    public static Map setFullElementResults(SetFullElement e) {
-        Object known = e.known;
-        long knownTime = (long) ((Map) e.known).get("time");
-        Map lastPresent = e.lastPresent;
-        Map lastAbsent = e.lastAbsent;
+    public static Map<String, Object> setFullElementResults(SetFullElement e) {
+        Object known = e.getKnown();
+        double knownTime = e.getKnown().getTime();
+        Operation lastPresent = e.getLastPresent();
+        Operation lastAbsent = e.getLastAbsent();
 
-        boolean stable = lastAbsent != null && ((int) lastAbsent.get("index") - 1 < (int) lastPresent.get("index"));
-        boolean lost = known != null && lastAbsent != null && ((int) lastPresent.get("index") - 1 < (int) lastAbsent.get("index")) && ((int) ((Map) e.known).get("index") < (int) lastAbsent.get("index"));
+        boolean stable = lastPresent != null && (lastAbsent.getIndex() - 1 < lastPresent.getIndex());
+        boolean lost = known != null && lastAbsent != null && (lastPresent.getIndex() - 1 < lastAbsent.getIndex()) && e.getKnown().getIndex() < lastAbsent.getIndex();
         boolean neverRead = !(stable || lost);
         //  TODO 0 is not really right
-        long stableTime = 0;
+        double stableTime = 0;
         if (stable) {
             if (lastAbsent != null) {
-                stableTime = (long) lastAbsent.get("time") + 1;
+                stableTime = lastAbsent.getTime() + 1;
             } else {
                 stableTime = 0;
             }
         }
 
-        long lostTime = 0;
+        double lostTime = 0;
         if (lost) {
             if (lastPresent != null) {
-                lostTime = (long) lastPresent.get("time") + 1;
+                lostTime = lastPresent.getTime() + 1;
             } else {
                 lostTime = 0;
             }
@@ -178,12 +176,12 @@ public class CheckerUtil {
 
         double stableLatency = 0;
         if (stable) {
-            stableLatency = Util.nanos2ms(Math.max(knownTime - stableTime, 0));
+            stableLatency = Util.nanos2ms(Math.max(stableTime - knownTime, 0));
         }
 
         double lostLatency = 0;
         if (lost) {
-            lostLatency = Util.nanos2ms(Math.max(knownTime - lostTime, 0));
+            lostLatency = Util.nanos2ms(Math.max(lostTime - knownTime, 0));
         }
 
         String outcome;
@@ -192,16 +190,17 @@ public class CheckerUtil {
         } else if (lost) {
             outcome = "lost";
         } else {
-            outcome = "neverRead";
+            outcome = "never-read";
         }
-        return Map.of(
-                "element", e.element,
+        Map<String, Object> res = new HashMap<>(Map.of(
+                "element", e.getElement(),
                 "outcome", outcome,
                 "stable-latency", stableLatency,
                 "lost-latency", lostLatency,
-                "known", known,
-                "last-absent", lastAbsent
-        );
+                "known", known
+        ));
+        res.put("last-absent", lastAbsent);
+        return res;
 
     }
 
@@ -236,32 +235,35 @@ public class CheckerUtil {
 
         Map<Object, List<Map>> outcomes = rs.stream().collect(Collectors.groupingBy(r -> r.get("outcome")));
 
-        List<Map> stale = outcomes.get("stable").stream().filter(o -> (long) o.get("stable-latency") > 0).collect(Collectors.toList());
-        List<Map> worstStale = stale.stream().sorted((s1, s2) -> (int) ((long) s2.get("stable-latency") - (long) s1.get("stable-latency"))).collect(Collectors.toList()).subList(0, 8);
+        List<Map> stale = outcomes.getOrDefault("stable", new ArrayList<>()).stream().filter(o -> (long) o.get("stable-latency") > 0).collect(Collectors.toList());
+        List<Map> worstStale = stale.stream().sorted((s1, s2) -> (int) ((long) s2.get("stable-latency") - (long) s1.get("stable-latency"))).collect(Collectors.toList());
+        if (worstStale.size() > 8) {
+            worstStale = worstStale.subList(0, 8);
+        }
         List<Double> stableLatencies = rs.stream().map(r -> (double) r.get("stable-latency")).collect(Collectors.toList());
         List<Double> lostLatencies = rs.stream().map(r -> (double) r.get("lost-latency")).collect(Collectors.toList());
         Object valid;
-        if (outcomes.get("lost").size() > 0) {
+        if (outcomes.getOrDefault("lost", new ArrayList<>()).size() > 0) {
             valid = false;
-        } else if (outcomes.get("stable").size() == 0) {
+        } else if (outcomes.getOrDefault("stable", new ArrayList<>()).size() == 0) {
             valid = "unknown";
         } else if ((boolean) opts.get("linearizable?") && stale.size() > 0) {
             valid = false;
         } else {
             valid = true;
         }
-        Map m = Map.of(
+        Map m = new HashMap(Map.of(
                 "valid?", valid,
                 "attempt-count", rs.size(),
-                "stable-count", outcomes.get("stable").size(),
-                "lost-count", outcomes.get("lost").size(),
-                "lost", outcomes.get("lost").stream().map(l -> l.get("element")).sorted().collect(Collectors.toList()),
-                "never-read-count", outcomes.get("never-read").size(),
-                "never-read", outcomes.get("never-read").stream().map(n -> n.get("element")).sorted().collect(Collectors.toList()),
+                "stable-count", outcomes.getOrDefault("stable",new ArrayList<>()).size(),
+                "lost-count", outcomes.getOrDefault("lost",new ArrayList<>()).size(),
+                "lost", outcomes.getOrDefault("lost",new ArrayList<>()).stream().map(l -> l.get("element")).sorted().collect(Collectors.toList()),
+                "never-read-count", outcomes.getOrDefault("never-read",new ArrayList<>()).size(),
+                "never-read", outcomes.getOrDefault("never-read",new ArrayList<>()).stream().map(n -> n.get("element")).sorted().collect(Collectors.toList()),
                 "stale-count", stale.size(),
                 "stale", stale.stream().map(s -> s.get("element")).sorted().collect(Collectors.toList()),
                 "worst-stale", worstStale
-        );
+        ));
 
         List<Double> points = List.of(0d, 0.5, 0.95, 0.99, 1d);
         m.put("stable-latencies", frequencyDistribution(points, stableLatencies));
@@ -389,8 +391,8 @@ public class CheckerUtil {
         //        Map map = new PersistentArrayMap(new Object[]{Keyword.intern(Symbol.create("except")), 1,
         //                Keyword.intern(Symbol.create("context")), 2});
         //        LazySeq res1 = (LazySeq) ClojureCaller.call("clojure.core", "filter", Keyword.intern("except"), map);
-        Object res1 = ClojureCaller.call("clojure.core", "if-not", true, false, 2, 3);
-        log.info(res1.toString());
-        Map<String, Object> te = Map.of("1", false, "2", "233");
+//        Object res1 = ClojureCaller.call("clojure.core", "if-not", true, false, 2, 3);
+//        log.info(res1.toString());
+//        Map<String, Object> te = Map.of("1", false, "2", "233");
     }
 }

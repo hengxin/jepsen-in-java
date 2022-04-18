@@ -1,10 +1,12 @@
 package core.checker.checker;
 
 import core.checker.vo.Result;
+import core.checker.vo.TestInfo;
 import lombok.extern.slf4j.Slf4j;
-import util.ClojureCaller;
+import util.Store;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,9 @@ public class LogFilePattern implements Checker {
                     int exit = (int) node.get("exit");
                     String out = (String) node.get("out");
                     Object err = node.get("err");
-                    File file = (File) ClojureCaller.call("jepsen.store", "path", test, node, filename);
+                    TestInfo testInfo = new TestInfo((String) test.getOrDefault("name", ""), (LocalDateTime) test.getOrDefault("start-time", 0));
+                    String[] args = new String[]{node.toString(), filename.toString()};
+                    File file = Store.path(testInfo, args);
 
                     try {
                         file.getCanonicalPath();

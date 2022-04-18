@@ -3,9 +3,6 @@ package core.checker.linearizability;
 import core.checker.model.Inconsistent;
 import core.checker.model.Model;
 import core.checker.util.OpUtil;
-import net.logstash.logback.encoder.com.lmax.disruptor.LifecycleAware;
-import net.schmizz.sshj.transport.cipher.Cipher;
-import org.bouncycastle.math.raw.Mod;
 
 import java.util.*;
 import java.util.stream.Collectors;

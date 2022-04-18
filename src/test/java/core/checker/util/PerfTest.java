@@ -1,42 +1,26 @@
 package core.checker.util;
 
-import clojure.java.api.Clojure;
-import clojure.lang.IFn;
-import core.checker.checker.CheckerUtil;
-import net.logstash.logback.encoder.com.lmax.disruptor.LifecycleAware;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import util.ClojureCaller;
 
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class PerfTest {
 
     @Test
     void broadenRange() {
         List<Double> range = List.of(3.14, 3.14);
-        List<Double> res1 = (List<Double>) ClojureCaller.call("jepsen.checker.perf", "broaden-range", range);
-        List<Double> res2 = Perf.broadenRange(3.14, 3.14);
-        Assertions.assertEquals(res1.size(), res2.size());
-        for (Double d : res1) {
-            Assertions.assertTrue(res2.contains(d));
-        }
-
+        List<Double> res = Perf.broadenRange(3.14, 3.14);
+        List<Double> resExpected = List.of(2.14, 4.140000000000001);
+        Assertions.assertEquals(resExpected, res);
     }
 
     @Test
     void broadenRange2() {
         List<Double> range = List.of(3.14, 5.14);
-        List<Double> res1 = (List<Double>) ClojureCaller.call("jepsen.checker.perf", "broaden-range", range);
-        List<Double> res2 = Perf.broadenRange(3.14, 5.14);
-        Assertions.assertEquals(res1.size(), res2.size());
-        for (Double d : res1) {
-            Assertions.assertTrue(res2.contains(d));
-        }
-
+        List<Double> res = Perf.broadenRange(3.14, 5.14);
+        List<Double> resExpected = List.of(3.1, 5.2);
+        Assertions.assertEquals(resExpected, res);
     }
 
 
@@ -92,36 +76,37 @@ class PerfTest {
     @Test
     void bucketScale() {
         long dt = 10, b = 2;
-        Object res1 = ClojureCaller.call("jepsen.checker.perf", "bucket-scale", dt, b);
-        double res2 = Perf.bucketScale(dt, b);
-        Assertions.assertEquals(Double.parseDouble(res1.toString()), res2);
+        double res = Perf.bucketScale(dt, b);
+        Assertions.assertEquals(res, 25);
     }
 
     @Test
     void bucketTime() {
         long dt = 10, b = 2;
-        long res1 = (long) ClojureCaller.call("jepsen.checker.perf", "bucket-time", dt, b);
-        double res2 = Perf.bucketTime(dt, b);
-        Assertions.assertEquals(res1, res2);
+        double res = Perf.bucketTime(dt, b);
+        Assertions.assertEquals(res, 5);
     }
 
     @Test
     void buckets() {
         long dt = 10, b = 30;
-        List<Long> res1 = (List<Long>) ClojureCaller.call("jepsen.checker.perf", "buckets", dt, b);
-        List<Double> res2 = Perf.buckets(dt, b);
-        Assertions.assertEquals(res1.size(), res2.size());
+        List<Double> res = Perf.buckets(dt, b);
+        List<Double> resExpected = List.of(5d, 15d, 25d);
+        Assertions.assertEquals(resExpected, res);
     }
 
     @Test
     void bucketPoints() {
         long dt = 10;
         List<List<?>> points = List.of(List.of(33L, 1), List.of(36L, 1), List.of(68L, 2));
-        Map<Long, List> res1 = (Map<Long, List>) ClojureCaller.call("jepsen.checker.perf", "bucket-points", dt, points);
-        Map<Double, List<List<?>>> res2 = Perf.bucketPoints(dt, points);
-        Assertions.assertEquals(res1.size(), res2.size());
-        for (Long key : res1.keySet()) {
-            Assertions.assertEquals(res1.get(key), res2.get(key));
+        Map<Double, List<List<?>>> res = new HashMap<>(Perf.bucketPoints(dt, points));
+        Map<Double, List<List<?>>> resExpected = new HashMap<>(Map.of(
+                65d, new ArrayList<>(List.of(new ArrayList<>(List.of(68, 2)))),
+                35d, new ArrayList<>(List.of(new ArrayList<>(List.of(33, 1)), new ArrayList<>(List.of(36, 1))))
+        ));
+        Assertions.assertEquals(res.keySet(), resExpected.keySet());
+        for (Map.Entry<Double, List<List<?>>> entry : res.entrySet()) {
+            Assertions.assertEquals(resExpected.get(entry.getKey()).size(), entry.getValue().size());
         }
     }
 
@@ -129,12 +114,11 @@ class PerfTest {
     void quantiles() {
         List<Double> quantiles = List.of(0.33, 0.14, 0.55);
         List<Double> points = List.of(33d, 1d, 36d, 1d, 68d, 2d);
-        Map<Double, Double> res1 = (Map) ClojureCaller.call("jepsen.checker.perf", "quantiles", quantiles, points);
-        Map<Double, Double> res2 = Perf.quantiles(quantiles, points);
-        Assertions.assertEquals(res1.size(), res2.size());
-        for (Double key : res1.keySet()) {
-            Assertions.assertEquals(res1.get(key), res2.get(key));
-        }
+        Map<Double, Double> res = Perf.quantiles(quantiles, points);
+        Map<Double, Double> resExpected = new HashMap<>(Map.of(
+                0.33, 1.0, 0.14, 1.0, 0.55, 33.0
+        ));
+        Assertions.assertEquals(res, resExpected);
     }
 
     @Test

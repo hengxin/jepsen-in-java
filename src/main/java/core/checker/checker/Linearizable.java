@@ -1,13 +1,18 @@
 package core.checker.checker;
 
+import core.checker.linearizability.Op;
+import core.checker.linearizability.Wgl;
+import core.checker.model.Model;
 import core.checker.vo.Result;
-import knossos.model.Model;
+import core.checker.vo.TestInfo;
 import lombok.extern.slf4j.Slf4j;
-import util.ClojureCaller;
+import util.Store;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Validates linearizability with Knossos
@@ -26,23 +31,25 @@ public class Linearizable implements Checker {
 
     @Override
     public Result check(Map test, List<Operation> history, Map opts) {
-        Map a;
+        Map<String, Object> a;
         switch (algorithm.toString()) {
             case "linear":
-                a = (Map) ClojureCaller.call("knossos.linear", "analysis", model, history);
+                a = Wgl.analysis(model, history.stream().map(Op::new).collect(Collectors.toList()));
                 break;
             case "wgl":
-                a = (Map) ClojureCaller.call("knossos.wgl", "analysis", model, history);
+                a = Wgl.analysis(model, history.stream().map(Op::new).collect(Collectors.toList()));
                 break;
             default:
-                a = (Map) ClojureCaller.call("knossos.competition", "analysis", model, history);
+                a = Wgl.analysis(model, history.stream().map(Op::new).collect(Collectors.toList()));
         }
 
         if (!(boolean) a.get("valid?")) {
             try {
-                File file = (File) ClojureCaller.call("jepsen.store", "path!", test, opts.get("subdirectory"), "linear.svg");
+                TestInfo testInfo = new TestInfo((String) test.getOrDefault("name", ""), (LocalDateTime) test.get("start-time"));
+                String[] args = new String[]{(String) opts.getOrDefault("subdirectory", ""), "linear.svg"};
+                File file = Store.makePathIfNotExists(testInfo, args);
                 String path = file.getCanonicalPath();
-                ClojureCaller.call("knossos.linear.report", "render-analysis!", history, a, path);
+                //                ClojureCaller.call("knossos.linear.report", "render-analysis!", history, a, path);
             } catch (Exception e) {
                 log.warn(e + " Error rendering linearizability analysis");
             }

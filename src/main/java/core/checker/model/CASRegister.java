@@ -1,6 +1,5 @@
 package core.checker.model;
 
-import clojure.lang.LispReader;
 import core.checker.checker.Operation;
 import core.checker.linearizability.CacheConfig;
 import lombok.Data;

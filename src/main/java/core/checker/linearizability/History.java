@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class History {
-    public static void index(List<Op> history) {
+    public static void index(List<? extends Operation> history) {
         for (int i = 0; i < history.size(); i++) {
             history.get(i).setIndex(i);
         }

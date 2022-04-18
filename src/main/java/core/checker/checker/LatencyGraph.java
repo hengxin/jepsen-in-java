@@ -2,7 +2,6 @@ package core.checker.checker;
 
 import core.checker.util.Perf;
 import core.checker.vo.Result;
-import util.ClojureCaller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +34,6 @@ public class LatencyGraph implements Checker {
         }
         Perf.pointGraph(test, history, o);
         Perf.quantilesGraph(test, history, o);
-        //        ClojureCaller.call("jepsen.checker.perf", "point-graph!", test, history, o);
-        //        ClojureCaller.call("jepsen.checker.perf", "quantiles-graph!", test, history, o);
         Result result = new Result();
         result.setValid(true);
         return result;

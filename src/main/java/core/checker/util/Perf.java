@@ -17,11 +17,18 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.Axis;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.FastScatterPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.ui.HorizontalAlignment;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.VerticalAlignment;
 import org.jfree.data.Range;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -44,19 +51,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Perf {
     final static String DEFAULT_NEMESIS_COLOR = "#cccccc";
-    final static String[] TYPES = new String[]{"ok", "info", "fail"};
-    final static Map<String, String> TYPE2COLOR = Map.of("ok", "#81BFFC", "info", "#FFA400", "fail", "#FF1E90");
+    final static Operation.Type[] TYPES = new Operation.Type[]{Operation.Type.OK, Operation.Type.INFO, Operation.Type.FAIL};
+    final static Map<Operation.Type, String> TYPE2COLOR = Map.of(Operation.Type.OK, "#81BFFC", Operation.Type.INFO, "#FFA400", Operation.Type.FAIL, "#FF1E90");
     final static double NEMESIS_ALPHA = 0.6;
 
-    public static double bucketScale(long dt, double b) {
-        return dt / 2.0 + dt * b;
+    public static double bucketScale(double dt, double b) {
+        return dt / 2 + dt * Double.valueOf(b).longValue();
     }
 
-    public static double bucketTime(long dt, double t) {
+    public static double bucketTime(double dt, double t) {
         return bucketScale(dt, t / dt);
     }
 
-    public static List<Double> buckets(long dt, long tMax) {
+    public static List<Double> buckets(double dt, long tMax) {
         long i = 0;
         double scale = bucketScale(dt, i);
         ;
@@ -159,18 +166,18 @@ public class Perf {
         );
     }
 
-    public static Map<String, Object> invokeByType(List<Operation> operations) {
-        Map<String, Object> res = new HashMap<>();
-        res.put("ok", operations.stream().filter(op -> (op.getCompletion().getType() == Operation.Type.OK)).collect(Collectors.toList()));
-        res.put("fail", operations.stream().filter(op -> (op.getCompletion().getType() == Operation.Type.FAIL)).collect(Collectors.toList()));
-        res.put("info", operations.stream().filter(op -> (op.getCompletion().getType() == Operation.Type.INFO)).collect(Collectors.toList()));
+    public static Map<Operation.Type, Object> invokeByType(List<Operation> operations) {
+        Map<Operation.Type, Object> res = new HashMap<>();
+        res.put(Operation.Type.OK, operations.stream().filter(op -> (op.getCompletion().getType() == Operation.Type.OK)).collect(Collectors.toList()));
+        res.put(Operation.Type.FAIL, operations.stream().filter(op -> (op.getCompletion().getType() == Operation.Type.FAIL)).collect(Collectors.toList()));
+        res.put(Operation.Type.INFO, operations.stream().filter(op -> (op.getCompletion().getType() == Operation.Type.INFO)).collect(Collectors.toList()));
         return res;
     }
 
     public static Map invokesByFType(List<Operation> history) {
-        Map<String, List<Operation>> invokes = history.stream().filter(OpUtil::isInvoke).collect(Collectors.groupingBy(h -> h.getF().toString()));
+        Map<Operation.F, List<Operation>> invokes = history.stream().filter(OpUtil::isInvoke).collect(Collectors.groupingBy(Operation::getF));
         Map res = new HashMap();
-        for (Map.Entry<String, List<Operation>> entry : invokes.entrySet()) {
+        for (Map.Entry<Operation.F, List<Operation>> entry : invokes.entrySet()) {
             res.put(entry.getKey(), invokeByType(entry.getValue()));
         }
 
@@ -288,7 +295,7 @@ public class Perf {
 
         List<Double> xRange = broadenRange(x_min, x_max);
         List<Double> yRange;
-        if (plot.get("logscale").equals("y")) {
+        if (plot.getOrDefault("logscale", false).equals("y")) {
             yRange = List.of(y_min, y_max);
         } else {
             yRange = broadenRange(y_min, y_max);
@@ -398,8 +405,8 @@ public class Perf {
     }
 
     public static void withNemeses(Map<String, Object> plot, List<Operation> history, List nemeses) {
-        nemeses = nemesisActivity(nemeses, history);
-        plot.put("series", nemesisSeries(plot, nemeses));
+        //        nemeses = nemesisActivity(nemeses, history);
+        //        plot.put("series", nemesisSeries(plot, nemeses));
         //        plot.put("preamble",ne)
     }
 
@@ -414,55 +421,73 @@ public class Perf {
             assert !((List) s.get("data")).isEmpty() : "Series has no data points\n" + String.join(" ", empty.toString());
         }
 
-        if (opts.containsKey("draw-fewer-on-top?") && opts.get("draw-fewer-on-top?").equals(true)) {
-            series.sort((s1, s2) -> {
-                int c1 = ((List) s1.get("data")).size();
-                int c2 = ((List) s2.get("data")).size();
-                return c2 - c1;
-            });
-            List<Map> newSeries = new ArrayList<>();
-            for (Map s : series) {
-                s.remove("title");
-                newSeries.add(s);
+        //        while ((boolean) opts.getOrDefault("draw-fewer-on-top?", false)) {
+        //            series.sort((s1, s2) -> {
+        //                int c1 = ((List) s1.get("data")).size();
+        //                int c2 = ((List) s2.get("data")).size();
+        //                return c2 - c1;
+        //            });
+        //            List<Map> newSeries = new ArrayList<>();
+        //            for (Map s : series) {
+        //                s.remove("title");
+        //                newSeries.add(s);
+        //            }
+        //            // dummy points
+        //            for (Map s : series) {
+        //                s.put("data", List.of(List.of(0, -1)));
+        //                newSeries.add(s);
+        //            }
+        //            opts.put("series", series);
+        //            opts.put("draw-fewer-on-top?", false);
+        //        }
+        series = (List) opts.get("series");
+        Plot plot = (Plot) opts.get("preamble");
+        List<Double> xRange = (List<Double>) opts.get("xrange");
+        List<Double> yRange = (List<Double>) opts.get("yrange");
+        Object logScale = opts.getOrDefault("logscale", false);
+        List<List<List<?>>> data = series.stream().map(s -> (List<List<?>>) s.get("data")).collect(Collectors.toList());
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        for (Map<?, ?> s : series) {
+            XYSeries xys = new XYSeries((String) s.get("title"));
+            for (List<?> d : (List<List<?>>) s.get("data")) {
+                xys.add(Double.parseDouble(d.get(0).toString()), Double.parseDouble(d.get(1).toString()));
             }
-            for (Map s : series) {
-                s.put("data", List.of(List.of(0, -1)));
-                newSeries.add(s);
-            }
-            opts.put("series", series);
-            opts.put("draw-fewer-op-top?", false);
-        } else {
-            series = (List) opts.get("series");
-            Plot plot = (Plot) opts.get("preamble");
-            List<Double> xRange = (List<Double>) opts.get("xrange");
-            List<Double> yRange = (List<Double>) opts.get("yrange");
-            Object logScale = opts.get("logscale");
-            //            Object plot=plot();TODO gnuplot commands
-            List<List<?>> data = series.stream().map(s -> (List<?>)s.get("data")).collect(Collectors.toList());
-            XYSeriesCollection dataset = new XYSeriesCollection();
-            XYSeries series1=new XYSeries("1");
-            for (List<?> d:data){
-                series1.add((double) d.get(0),(double) d.get(1));
-            }
-
-            dataset.addSeries(series1);
-            NumberAxis x=new NumberAxis(plot.getXLabel());
-            Range range=new Range(xRange.get(0),xRange.get(1));
-            x.setRange(range);
-            Range range1=new Range(yRange.get(0),yRange.get(1));
-            LogAxis y= new LogAxis(plot.getYLabel());
-            y.setRange(range1);
-            XYPlot xyPlot=new XYPlot(dataset,x,y,new XYLineAndShapeRenderer(true, true));
-            JFreeChart chart=new JFreeChart(plot.getTitle(),JFreeChart.DEFAULT_TITLE_FONT,xyPlot,false);
-            try {
-                OutputStream out = new FileOutputStream("jfree.png");
-                ChartUtils.writeChartAsPNG(out,chart,1000, 500);
-
-            }catch (Exception e){
-                e.printStackTrace();
-                log.error(e.getMessage());
-            }
+            dataset.addSeries(xys);
         }
+
+        ValueAxis xAxis = null, yAxis = null;
+        if (logScale.equals("x")) {
+            xAxis = new LogAxis(plot.getXLabel());
+            yAxis = new NumberAxis(plot.getYLabel());
+        } else if (logScale.equals("y")) {
+            xAxis = new NumberAxis(plot.getXLabel());
+            yAxis = new LogAxis(plot.getYLabel());
+        } else {
+            xAxis = new NumberAxis(plot.getXLabel());
+            yAxis = new NumberAxis(plot.getYLabel());
+        }
+
+        Range range = new Range(xRange.get(0), xRange.get(1));
+        xAxis.setRange(range);
+        Range range1 = new Range(yRange.get(0), yRange.get(1));
+        yAxis.setRange(range1);
+        XYLineAndShapeRenderer xyLineAndShapeRenderer = new XYLineAndShapeRenderer(plot.isLine(), true);
+        xyLineAndShapeRenderer.setDefaultShapesFilled(false);
+        XYPlot xyPlot = new XYPlot(dataset, xAxis, yAxis, xyLineAndShapeRenderer);
+        JFreeChart chart = new JFreeChart(plot.getTitle(), JFreeChart.DEFAULT_TITLE_FONT, xyPlot, true);
+        LegendTitle legendTitle = chart.getLegend();
+        legendTitle.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        legendTitle.setVerticalAlignment(VerticalAlignment.CENTER);
+        legendTitle.setPosition(RectangleEdge.RIGHT);
+        try {
+            OutputStream out = new FileOutputStream(plot.getOutput().toString());
+            ChartUtils.writeChartAsPNG(out, chart, 1000, 500);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+        }
+
     }
 
     public static Map fs2points(List fs) {
@@ -495,21 +520,28 @@ public class Perf {
         Map fs2Points = fs2points(fs);
         TestInfo testInfo = new TestInfo((String) test.get("name"), LocalDateTime.ofEpochSecond((int) test.get("start-time") / 1000, 0, ZoneOffset.ofHours(8)));
         String[] args = new String[]{subdirectory == null ? "" : subdirectory, "latency-raw.png"};
-        File outputPath = Store.makePathIfNotExists(testInfo, args);
-        Plot plot = latencyPlot(test, outputPath.toPath());
+        String outputPath = "";
+        try {
+            outputPath = Store.makePathIfNotExists(testInfo, args).getCanonicalPath();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+        }
+        Plot plot = latencyPlot(test, Path.of(outputPath));
+        plot.setLine(false);
         List<Map> series = new ArrayList<>();
         for (Object f : fs) {
-            for (String t : TYPES) {
+            for (Operation.Type t : TYPES) {
                 if (datasets.containsKey(f)) {
                     if (((Map) datasets.get(f)).containsKey(t)) {
                         List<Operation> data = ((List) ((Map) datasets.get(f)).get(t));
-                        Map res = Map.of(
+                        Map res = new HashMap(Map.of(
                                 "title", f.toString() + " " + t,
                                 "with", fs2Points,
                                 "linetype", TYPE2COLOR.get(t),
                                 "pointtype", fs2points(List.of(f)),
                                 "data", data.stream().map(Perf::latencyPoint).collect(Collectors.toList())
-                        );
+                        ));
                         series.add(res);
                     }
                 }
@@ -578,6 +610,7 @@ public class Perf {
         }
 
         Plot plot = latencyPlot(test, Path.of(outputPath));
+        plot.setLine(true);
         List<Map> series = new ArrayList<>();
         for (Object f : fs) {
             for (double q : qs) {
@@ -609,28 +642,33 @@ public class Perf {
     }
 
     public static Plot ratePlot(TestInfo testInfo, Path outputPath) {
-        Plot plot = new Plot();
+        Plot plot = plot(outputPath);
         plot.setTitle(testInfo.getName() + " rate");
         plot.setYLabel("Throughput (hz)");
         return plot;
     }
 
     public static void rateGraph(Map test, List<Operation> history, Map opts) {
-        List nemeses;
+        List<Operation> nemeses = new ArrayList();
         if (opts.containsKey("nemeses")) {
             nemeses = (List) opts.get("nemeses");
         } else {
-            nemeses = (List) ((Map) test.get("plot")).get("nemeses");
+            if (test.containsKey("nemeses")) {
+                if (((Map) test.get("nemeses")).containsKey("plot")) {
+                    nemeses = (List) ((Map) test.get("plot")).get("nemeses");
+                }
+            }
         }
         String subdirectory = (String) opts.get("subdirectory");
+        subdirectory = subdirectory == null ? "" : subdirectory;
         int dt = 10;
         double td = 1.0 / dt;
-        double tMax = Util.nanos2secs(history.stream().map(h -> (double) h.getTime()).reduce(0.0, (x, y) -> x > y ? x : y));
-        Map<Object, Object> datasets = new HashMap();
+        double tMax = Util.nanos2secs(history.stream().map(Operation::getTime).reduce(0.0, (x, y) -> x > y ? x : y));
+        Map<Object, Object> datasets = new HashMap<>();
         history.removeIf(OpUtil::isInvoke);
         List<Operation> process = history.stream().filter(h -> h.getProcess() >= 0).collect(Collectors.toList());
         for (Operation operation : process) {
-            double time = bucketTime(dt, (long) Util.nanos2secs((double) operation.getTime()));
+            double time = bucketTime(dt, (long) Util.nanos2secs(operation.getTime()));
             if (datasets.containsKey(operation.getF())) {
                 Map d1 = (Map) datasets.get(operation.getF());
                 if (d1.containsKey(operation.getType())) {
@@ -642,49 +680,52 @@ public class Perf {
                     }
 
                 } else {
-                    d1.put(operation.getType(), Map.of(time, td));
+                    d1.put(operation.getType(), new HashMap<>(Map.of(time, td)));
                 }
             } else {
-                datasets.put(operation.getF(), Map.of(operation.getType(), Map.of(time, td)));
+                datasets.put(operation.getF(), new HashMap<>(Map.of(operation.getType(), new HashMap<>(Map.of(time, td)))));
             }
         }
         List<Object> fs = datasets.keySet().stream().sorted().collect(Collectors.toList());
         Map fs2points = fs2points(fs);
-        TestInfo testInfo = new TestInfo((String) test.get("name"), LocalDateTime.ofEpochSecond((long) test.get("start-time") / 1000, 0, ZoneOffset.ofHours(8)));
+        TestInfo testInfo = new TestInfo((String) test.get("name"), LocalDateTime.ofEpochSecond(Long.parseLong(test.get("start-time").toString()) / 1000, 0, ZoneOffset.ofHours(8)));
         String[] args = new String[]{subdirectory, "rate.png"};
         String outputPath = "";
         try {
-            outputPath = Store.path(testInfo, args).getCanonicalPath();
+            outputPath = Store.makePathIfNotExists(testInfo, args).getCanonicalPath();
 
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());
         }
         Plot plot = ratePlot(testInfo, Path.of(outputPath));
+        plot.setLine(true);
         List series = new ArrayList();
 
         for (Object f : fs) {
-            for (String t : TYPES) {
-                Map<String, Object> s = Map.of(
+            for (Operation.Type t : TYPES) {
+                Map<String, Object> s = new HashMap<>(Map.of(
                         "title", f + " " + t,
                         "with", "linespoints",
                         "linetype", TYPE2COLOR.get(t),
                         "pointtype", fs2points(List.of(f))
-                );
+                ));
                 List<Object> data = new ArrayList<>();
                 Map m = (Map) ((Map) datasets.get(f)).get(t);
+                m = m == null ? new HashMap<>() : m;
                 List<Double> buckets = buckets(dt, (long) tMax);
                 for (double b : buckets) {
-                    data.add(m.getOrDefault(b, 0));
+                    data.add(List.of(b, m.getOrDefault(b, 0)));
                 }
                 s.put("data", data);
+                series.add(s);
             }
         }
 
-        Map<String, Object> res = Map.of(
+        Map<String, Object> res = new HashMap<>(Map.of(
                 "preamble", plot,
                 "series", series
-        );
+        ));
         try {
             withRange(res);
         } catch (Exception e) {

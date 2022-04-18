@@ -13,4 +13,5 @@ public class Plot {
     String yLabel;
     Object chart;
     String logScale;
+    boolean line;
 }

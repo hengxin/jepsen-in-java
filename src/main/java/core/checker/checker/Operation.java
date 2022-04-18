@@ -1,5 +1,6 @@
 package core.checker.checker;
 
+import com.jcraft.jsch.MAC;
 import core.checker.linearizability.Op;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Data
@@ -27,7 +29,8 @@ public class Operation {
     private double time;
     private double latency;
     private Operation completion;
-    private List<List> clockOffsets;
+    private int index;
+    private Map<String, Double> clockOffsets;
 
     public Operation(Operation operation) {
         this.process = operation.getProcess();
@@ -61,6 +64,12 @@ public class Operation {
     public Operation(F f, Type type) {
         this.f = f;
         this.type = type;
+    }
+
+    public Operation(int process, double time, Map<String, Double> clockOffsets) {
+        this.process = process;
+        this.time = time;
+        this.clockOffsets = clockOffsets;
     }
 
     public static Operation invoke(int process, F f, Object value) {

@@ -1,11 +1,8 @@
 package core.checker.checker;
 
 import com.google.common.collect.HashMultiset;
-import core.checker.checker.Operation;
-import core.checker.checker.Queue;
 import core.checker.model.UnorderedQueue;
 import core.checker.vo.Result;
-import knossos.op.Op;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

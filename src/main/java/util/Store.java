@@ -18,6 +18,11 @@ public class Store {
 
     public static File path(TestInfo testInfo, String[] args) {
         File test = path(testInfo);
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] == null) {
+                args[i] = "";
+            }
+        }
         Path fullPath = Path.of(test.getPath(), args);
         return fullPath.toFile();
     }
@@ -26,7 +31,7 @@ public class Store {
         File file = path(testInfo, args);
 
         try {
-            file.mkdirs();
+            file.getParentFile().mkdirs();
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());

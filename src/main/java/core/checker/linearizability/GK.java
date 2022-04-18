@@ -290,10 +290,10 @@ public class GK {
             String content = FileUtils.readFileToString(file, "UTF-8");
             JSONArray jsonArray = new JSONArray(content);
             String res = "";
-            List<Operation> history = new ArrayList<>();
+            List<GKOp> history = new ArrayList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                Operation op = new Operation((int) jsonObject.get("process"), (String) jsonObject.get("type"), (String) jsonObject.get("f"), (int) jsonObject.get("value"));
+                GKOp op = new GKOp((int) jsonObject.get("process"), (String) jsonObject.get("type"), (String) jsonObject.get("f"), (int) jsonObject.get("value"));
                 history.add(op);
             }
         } catch (Exception e) {

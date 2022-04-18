@@ -5,8 +5,6 @@ import core.checker.model.Model;
 import core.checker.model.ModelUtil;
 import core.checker.util.OpUtil;
 import core.checker.vo.Result;
-import org.bouncycastle.math.raw.Mod;
-import util.ClojureCaller;
 
 import java.util.List;
 import java.util.Map;

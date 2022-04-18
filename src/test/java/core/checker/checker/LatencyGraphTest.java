@@ -12,7 +12,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LatencyGraphTest {
-    List<Operation> history;
+    public List<Operation> history;
 
     LatencyGraphTest() {
         Random random = new Random();

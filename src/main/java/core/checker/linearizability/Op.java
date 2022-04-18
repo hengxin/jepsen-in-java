@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Locale;
-import java.util.Map;
 
 @Slf4j
 @Data
@@ -66,6 +65,9 @@ public class Op extends Operation {
         this.type = op.getType();
         this.value = op.getValue();
         this.index = op.getIndex();
+    }
+    public Op(Operation op){
+        super(op);
     }
 
     public Op(core.record.Operation op) {

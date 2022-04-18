@@ -1,7 +1,5 @@
 package core.checker.linearizability;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.sun.jna.platform.win32.LMAccess;
 import core.checker.checker.Operation;
 import core.checker.model.CASRegister;
 import core.checker.model.Model;
@@ -14,7 +12,6 @@ import us.bpsm.edn.parser.Parser;
 import us.bpsm.edn.parser.Parsers;
 import util.Support;
 
-import javax.swing.event.ListDataEvent;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;

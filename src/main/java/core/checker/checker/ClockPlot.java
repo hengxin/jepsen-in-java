@@ -1,7 +1,7 @@
 package core.checker.checker;
 
+import core.checker.util.Clock;
 import core.checker.vo.Result;
-import util.ClojureCaller;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class ClockPlot implements Checker {
     @Override
     public Result check(Map test, List<Operation> history, Map opts) {
-        ClojureCaller.call("jepsen.checker.clock", "plot!", test, history, opts);
+        Clock.plot(test,history,opts);
         Result result = new Result();
         result.setValid(true);
         return result;

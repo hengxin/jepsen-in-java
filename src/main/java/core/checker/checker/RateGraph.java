@@ -1,7 +1,7 @@
 package core.checker.checker;
 
+import core.checker.util.Perf;
 import core.checker.vo.Result;
-import util.ClojureCaller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +27,7 @@ public class RateGraph implements Checker {
         for (Object key : cOpts.keySet()) {
             o.put(key, cOpts.get(key));
         }
-        ClojureCaller.call("jepsen.checker.perf", "rate-graph!", test, history, o);
+        Perf.rateGraph(test, history, o);
         Result result = new Result();
         result.setValid(true);
         return result;

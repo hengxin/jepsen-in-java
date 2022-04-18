@@ -1,17 +1,12 @@
 package core.checker.checker;
 
 import core.checker.vo.Result;
-import knossos.op.Op;
-import net.logstash.logback.encoder.com.lmax.disruptor.LifecycleAware;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CounterTest {
 
