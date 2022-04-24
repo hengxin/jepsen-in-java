@@ -1,5 +1,6 @@
 package core.checker.checker;
 
+import core.checker.linearizability.Op;
 import core.checker.model.Model;
 import core.checker.util.OpUtil;
 import core.checker.vo.Result;
@@ -148,12 +149,17 @@ public class CheckerUtil {
      */
     public static Map<String, Object> setFullElementResults(SetFullElement e) {
         Object known = e.getKnown();
-        double knownTime = e.getKnown().getTime();
+        double knownTime;
+        if (known != null) {
+            knownTime = e.getKnown().getTime();
+        } else {
+            knownTime = new Operation().getTime();
+        }
         Operation lastPresent = e.getLastPresent();
         Operation lastAbsent = e.getLastAbsent();
 
-        boolean stable = lastPresent != null && (lastAbsent.getIndex() - 1 < lastPresent.getIndex());
-        boolean lost = known != null && lastAbsent != null && (lastPresent.getIndex() - 1 < lastAbsent.getIndex()) && e.getKnown().getIndex() < lastAbsent.getIndex();
+        boolean stable = lastPresent != null && ((lastAbsent == null ? new Operation().getIndex() : lastAbsent.getIndex()) - 1 < lastPresent.getIndex());
+        boolean lost = known != null && lastAbsent != null && ((lastPresent == null ? new Operation().getIndex() : lastPresent.getIndex()) - 1 < lastAbsent.getIndex()) && e.getKnown().getIndex() < lastAbsent.getIndex();
         boolean neverRead = !(stable || lost);
         //  TODO 0 is not really right
         double stableTime = 0;
@@ -174,14 +180,14 @@ public class CheckerUtil {
             }
         }
 
-        double stableLatency = 0;
+        double stableLatency = Double.MAX_VALUE;
         if (stable) {
-            stableLatency = Util.nanos2ms(Math.max(stableTime - knownTime, 0));
+            stableLatency = Double.valueOf(Util.nanos2ms(Math.max(stableTime - knownTime, 0))).longValue();
         }
 
-        double lostLatency = 0;
+        double lostLatency = Double.MAX_VALUE;
         if (lost) {
-            lostLatency = Util.nanos2ms(Math.max(lostTime - knownTime, 0));
+            lostLatency = Double.valueOf(Util.nanos2ms(Math.max(lostTime - knownTime, 0))).longValue();
         }
 
         String outcome;
@@ -192,6 +198,7 @@ public class CheckerUtil {
         } else {
             outcome = "never-read";
         }
+        known = Optional.ofNullable(known);
         Map<String, Object> res = new HashMap<>(Map.of(
                 "element", e.getElement(),
                 "outcome", outcome,
@@ -235,13 +242,13 @@ public class CheckerUtil {
 
         Map<Object, List<Map>> outcomes = rs.stream().collect(Collectors.groupingBy(r -> r.get("outcome")));
 
-        List<Map> stale = outcomes.getOrDefault("stable", new ArrayList<>()).stream().filter(o -> (long) o.get("stable-latency") > 0).collect(Collectors.toList());
-        List<Map> worstStale = stale.stream().sorted((s1, s2) -> (int) ((long) s2.get("stable-latency") - (long) s1.get("stable-latency"))).collect(Collectors.toList());
+        List<Map> stale = outcomes.getOrDefault("stable", new ArrayList<>()).stream().filter(o -> (double) o.get("stable-latency") > 0).collect(Collectors.toList());
+        List<Map> worstStale = stale.stream().sorted((s1, s2) -> (int) ((double) s2.get("stable-latency") - (double) s1.get("stable-latency"))).collect(Collectors.toList());
         if (worstStale.size() > 8) {
             worstStale = worstStale.subList(0, 8);
         }
-        List<Double> stableLatencies = rs.stream().map(r -> (double) r.get("stable-latency")).collect(Collectors.toList());
-        List<Double> lostLatencies = rs.stream().map(r -> (double) r.get("lost-latency")).collect(Collectors.toList());
+        List<Double> stableLatencies = rs.stream().map(r -> (double) r.get("stable-latency")).filter(l -> l < Double.MAX_VALUE).collect(Collectors.toList());
+        List<Double> lostLatencies = rs.stream().map(r -> (double) r.get("lost-latency")).filter(l -> l < Double.MAX_VALUE).collect(Collectors.toList());
         Object valid;
         if (outcomes.getOrDefault("lost", new ArrayList<>()).size() > 0) {
             valid = false;

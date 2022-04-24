@@ -45,6 +45,10 @@ dependencies {
     implementation 'com.datastax.cassandra:cassandra-driver-core:3.4.0'
     implementation 'com.datastax.cassandra:cassandra-driver-mapping:3.4.0'
 
+    // https://mvnrepository.com/artifact/org.apache.xmlgraphics/batik-transcoder
+    implementation group: 'org.apache.xmlgraphics', name: 'batik-transcoder', version: '1.14'
+
+
 
     compile fileTree(dir:'libs',include:['*.jar'])
 }

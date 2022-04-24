@@ -1,9 +1,14 @@
 package core.checker.checker;
 
 import core.checker.vo.Result;
+import core.checker.vo.TestInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import util.Store;
 
+import java.io.File;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,6 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class CheckerUtilTest {
     CheckerUtil checkerUtil = new CheckerUtil();
     public List<Operation> history;
+
+    Map<String, Object> noopTest = new HashMap<>(Map.of(
+            "nodes", new ArrayList<>(List.of("n1", "n2", "n3", "n4", "n5")),
+            "name", "noop",
+            "checker", new UnbridledOptimism()
+
+    ));
 
     CheckerUtilTest() {
         Random random = new Random();
@@ -111,6 +123,21 @@ class CheckerUtilTest {
         Assertions.assertEquals(result.getValid(), true);
         Assertions.assertEquals(latencyGraph.getValid(), true);
         Assertions.assertEquals(rateGraph.getValid(), true);
+    }
+
+    @Test
+    void logFilePatternTest() {
+        noopTest.put("name", "checker-log-file-patten");
+        noopTest.put("start-time", 0);
+        noopTest.put("nodes", new ArrayList<>(List.of("n1", "n2", "n3")));
+        TestInfo testInfo = new TestInfo((String) noopTest.get("name"),  LocalDateTime.ofEpochSecond((int) noopTest.get("start-time"), 0, ZoneOffset.ofHours(8)) );
+        String[] args = new String[]{"n1", "db.log"};
+        File file1 = Store.makePathIfNotExists(testInfo, args);
+        args = new String[]{"n2", "db.log"};
+        File file2 = Store.makePathIfNotExists(testInfo, args);
+        LogFilePattern logFilePattern = new LogFilePattern("evil\\d+", "db.log");
+        logFilePattern.check(noopTest, null, null);
+
     }
 
 }

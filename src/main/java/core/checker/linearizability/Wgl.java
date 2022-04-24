@@ -176,13 +176,14 @@ public class Wgl {
         for (CacheConfig config : configs) {
             BitSet linearized = config.getLinearized();
             Model model = config.getModel();
-            calls.removeIf(call -> linearized.get(call.getEntryId()));
-            calls = calls.stream().map(pairIndex::get).collect(Collectors.toList());
+            List<Op> curCall=new ArrayList<>(calls);
+            curCall.removeIf(call -> linearized.get(call.getEntryId()));
+            curCall = curCall.stream().map(pairIndex::get).collect(Collectors.toList());
             Map<String, Object> p = new HashMap<>();
             p.put("op", pairIndex.getOrDefault(config.getOperation(), null));
             p.put("model", model);
             List<Map<String, Object>> path = new ArrayList<>(List.of(p));
-            Set<List<Map<String, Object>>> finalPaths = Analysis.finalPathsForConfig(path, finalOp, calls);
+            Set<List<Map<String, Object>>> finalPaths = Analysis.finalPathsForConfig(path, finalOp, curCall);
             for (List<Map<String, Object>> list : finalPaths) {
                 for (Map<String, Object> m : list) {
                     m.put("op", getOriginalOp(indices, (Op) m.get("op")));
@@ -305,6 +306,7 @@ public class Wgl {
     }
 
     public static Map<String, Object> check(Model model, List<Op> history, Map<String, Object> state) {
+        history=history.stream().map(Op::new).collect(Collectors.toList());
         List<Object> historyAndIndex = History.preprocess(history);
         history = (List<Op>) historyAndIndex.get(0);
         Map<Integer, Integer> internalToExternal = (Map<Integer, Integer>) historyAndIndex.get(1);

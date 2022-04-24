@@ -3,9 +3,11 @@ package core.checker.linearizability;
 import core.checker.checker.Operation;
 import core.checker.util.OpUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.CopyUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -16,8 +18,16 @@ public class History {
         }
     }
 
-    public static List processes(List<Operation> history) {
+    public static List<Integer> processes(List<? extends Operation> history) {
         return history.stream().map(Operation::getProcess).distinct().collect(Collectors.toList());
+    }
+
+    public static Op invocation(Map<Op, Op> pairIndex, Op op) {
+        if (OpUtil.isInvoke(op)) {
+            return op;
+        } else {
+            return pairIndex.getOrDefault(op,null);
+        }
     }
 
     public static void sortProcesses(List processes) {
@@ -41,6 +51,14 @@ public class History {
             completeFoldOp(res, index, operation);
         }
         return res;
+    }
+
+    public static Op completion(Map<Op, Op> pairIndex, Op op) {
+        if (OpUtil.isInvoke(op)) {
+            return pairIndex.get(op);
+        } else {
+            return op;
+        }
     }
 
     public static void completeFoldOp(List<Operation> history, Map<Integer, Integer> index, Operation operation) {
@@ -103,6 +121,12 @@ public class History {
             }
         }
         return new ArrayList<>(calls.values());
+    }
+
+    public static void convertOpIndices(Map<Integer, Integer> mapping, List<Op> ops) {
+        for (Op op : ops) {
+            convertOpIndex(mapping, op);
+        }
     }
 
     public static void convertOpIndex(Map<Integer, Integer> mapping, Op op) {
