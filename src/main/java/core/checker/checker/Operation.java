@@ -28,6 +28,8 @@ public class Operation {
     private Operation completion;
     private int index;
     private Map<String, Double> clockOffsets;
+    private int position;
+    Object link;
 
     public Operation(Operation operation) {
         this.process = operation.getProcess();
@@ -112,6 +114,6 @@ public class Operation {
     public enum F {
         START, STOP, READ, WRITE, CAS, ADD, TRANSFER, INC, TXN, RESUME_PD, RESUME_KV, RESUME_DB, START_PD, START_KV, START_DB,
         KILL_PD, KILL_KV, KILL_DB, PAUSE_DB, SHUFFLE_LEADER, SHUFFLE_REGION, RANDOM_MERGE, DEL_SHUFFLE_LEADER, DEL_SHUFFLE_REGION, DEL_RANDOM_MERGE,
-        SLOW_PRIMARY, STOP_PARTITION, CREATE_TABLE, INSERT, DRAIN, DEQUEUE, ENQUEUE, GENERATE, FOO, BAR,RELEASE,ACQUIRE
+        SLOW_PRIMARY, STOP_PARTITION, CREATE_TABLE, INSERT, DRAIN, DEQUEUE, ENQUEUE, GENERATE, FOO, BAR,RELEASE,ACQUIRE,READ_INIT
     }
 }

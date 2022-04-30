@@ -216,6 +216,40 @@ public class Util {
         return newHis;
     }
 
+    public static List<List<?>> permutations(List<?> objects) {
+        List<List<?>> ans = new ArrayList<>();
+
+        // If empty
+        if (objects.size() == 0) {
+            ans.add(new ArrayList<>());
+            return ans;
+        }
+
+        if (objects.size() == 1) {
+            ans.add(objects);
+            return ans;
+        }
+
+
+        for (int i = 0; i < objects.size(); i++) {
+            Object o = objects.get(i);
+
+            List<Object> rest = new ArrayList<>(objects.subList(0, i));
+            rest.addAll(objects.subList(i + 1, objects.size()));
+
+
+            List<List<?>> recur = permutations(rest);
+            for (List<?> r : recur) {
+                List<Object> cur = new ArrayList<>();
+                cur.add(o);
+                cur.addAll(r);
+                ans.add(cur);
+            }
+        }
+        return ans;
+    }
+
+
 
     public static void main(String[] args) {
         //        log.info("res1: " <"re");

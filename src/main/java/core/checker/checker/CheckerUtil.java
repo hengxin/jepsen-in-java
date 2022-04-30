@@ -376,6 +376,10 @@ public class CheckerUtil {
         ));
     }
 
+    public static Checker perf() {
+        return perf(new HashMap<>());
+    }
+
     /**
      * Plots clock offsets on all nodes"
      */

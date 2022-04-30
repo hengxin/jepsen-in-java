@@ -23,23 +23,26 @@ public class Wgl {
         return new CacheConfig(linearized, model, op);
     }
 
+
+    /**
+     * assign to invocation and its corresponding completion a same entry id
+     * ok invocations from 0 to c and crashed operations from c+1 to n
+     *
+     * @param history history
+     * @return newHis
+     */
     public static List<Op> withEntryIds(List<Op> history) {
         List<Op> newHis = new ArrayList<>();
+        // call process corresponds to op index in newHis
         Map<Integer, Integer> calls = new HashMap<>();
         int i = 0;
-        int eOk = 0;
+        int eOk = 0;// current entry id
         int eInfo = history.size() - History.crashedInvokes(history).size();
         while (history.size() > i) {
             Op op = history.get(i);
             int p = op.getProcess();
             if (OpUtil.isInvoke(op)) {
-                assert !calls.containsKey(p);
-                if (newHis.size() < i + 1) {
-                    assert newHis.size() == i;
-                    newHis.add(op);
-                } else {
-                    newHis.set(i, op);
-                }
+                newHis.add(op);
                 calls.put(p, i);
                 i++;
             } else if (OpUtil.isOk(op)) {
@@ -48,44 +51,28 @@ public class Wgl {
                 invoke.setEntryId(eOk);
                 newHis.set(invokeI, invoke);
                 op.setEntryId(eOk);
-                if (newHis.size() < i + 1) {
-                    assert newHis.size() == i;
-                    newHis.add(op);
-                } else {
-                    newHis.set(i, op);
-                }
+                newHis.add(op);
                 calls.remove(p);
                 i++;
                 eOk++;
             } else if (OpUtil.isFail(op)) {
                 assert false : "Err, shouldn't have a failure here: " + op;
-            }
-            //info corresponds to an earlier invoke
-            else if (OpUtil.isInfo(op)) {
+            } else if (OpUtil.isInfo(op)) {
+                //if info corresponds to an earlier invoke
                 if (calls.containsKey(p)) {
                     int invokeI = calls.get(p);
                     Op invoke = newHis.get(invokeI);
                     invoke.setEntryId(eInfo);
                     newHis.set(invokeI, invoke);
                     op.setEntryId(eInfo);
-                    if (newHis.size() < i + 1) {
-                        assert newHis.size() == i;
-                        newHis.add(op);
-                    } else {
-                        newHis.set(i, op);
-                    }
+                    newHis.add(op);
                     calls.remove(p);
                     i++;
                     eInfo++;
                 }
                 //random info
                 else {
-                    if (newHis.size() < i + 1) {
-                        assert newHis.size() == i;
-                        newHis.add(op);
-                    } else {
-                        newHis.set(i, op);
-                    }
+                    newHis.add(op);
                     i++;
                 }
             }
@@ -119,11 +106,13 @@ public class Wgl {
         Op invoke = null;
         for (Op op : history) {
             if (invoke != null) {
+                // find completion
                 if (invoke.getProcess() == op.getProcess()) {
                     found = new ArrayList<>(List.of(invoke, op));
                     break;
                 }
             } else {
+                // find invoke
                 if (entryId == op.getEntryId()) {
                     invoke = op;
                 }
