@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.*;
 import core.client.Client;
 import core.client.ClientInvokeResponse;
-import core.db.Zone;
+import core.db.Node;
 import core.record.ActionEnum;
 import core.record.Operation;
 import lombok.extern.slf4j.Slf4j;
@@ -77,11 +77,11 @@ public class Support {
     }
 
     // executeQuery用于select
-    public static <T> T JDBCQueryWithZone(Zone zone, String sql, Function<ResultSet, T> handle) {
+    public static <T> T JDBCQueryWithNode(Node node, String sql, Function<ResultSet, T> handle) {
         Connection connection = null;
         Statement statement = null;
         try {
-            connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
+            connection = DriverManager.getConnection(node.getOceanBaseURL(), node.getUsername(), node.getPassword());
             statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(sql);
             return handle.apply(rs);
@@ -103,10 +103,7 @@ public class Support {
     // TODO 合并一下
     // executeQuery用于select
     // Attention: maybe return is null!!!
-    public static <T> T JDBCQueryWithClient(Client client, String selectSQL, Function<ResultSet, T> handle) {
-        if(client.getConnection() == null)
-            return null;
-        Connection connection = client.getConnection();
+    public static <T> T JDBCQueryWithClient(Connection connection, String selectSQL, Function<ResultSet, T> handle) {
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -126,10 +123,7 @@ public class Support {
     }
 
     // executeUpdate用于create, insert, delete, update
-    public static Exception JDBCUpdate(Client client, String allSQL) {
-        if(client.getConnection() == null)
-            return new Exception("Client's connection is null!");
-        Connection connection = client.getConnection();
+    public static Exception JDBCUpdate(Connection connection, String allSQL) { ;
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -153,10 +147,10 @@ public class Support {
         return "chmod u+x " + shell_path + "\n" + shell_path + " " + args;
     }
 
-    public static Exception ExecuteCommand(Zone zone, String command) {
+    public static Exception ExecuteCommand(Node node, String command) {
         try {
-            Session session = jsch.getSession(zone.getUsername(), zone.getIp(), SSH_PORT);
-            session.setPassword(zone.getPassword());
+            Session session = jsch.getSession(node.getUsername(), node.getIp(), SSH_PORT);
+            session.setPassword(node.getPassword());
             session.setConfig("StrictHostKeyChecking","no");
             session.setTimeout(6000);
             session.connect();
@@ -179,10 +173,10 @@ public class Support {
         }
     }
 
-    public static Exception SendFile(Zone zone, String srcPath, String destPath) {
+    public static Exception SendFile(Node node, String srcPath, String destPath) {
         try {
-            Session session = jsch.getSession(zone.getUsername(), zone.getIp(), SSH_PORT);
-            session.setPassword(zone.getPassword());
+            Session session = jsch.getSession(node.getUsername(), node.getIp(), SSH_PORT);
+            session.setPassword(node.getPassword());
             session.setConfig("StrictHostKeyChecking","no");
             session.setTimeout(6000);
             session.connect();

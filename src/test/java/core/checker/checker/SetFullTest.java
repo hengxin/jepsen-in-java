@@ -1,16 +1,11 @@
 package core.checker.checker;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import core.checker.linearizability.History;
-import core.checker.linearizability.Op;
 import core.checker.vo.Result;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SetFullTest {
 

@@ -1,6 +1,6 @@
 package core.control;
 
-import core.db.Zone;
+import core.db.Node;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,6 +11,6 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class ControlConfig {
     private String dbName;
-    private ArrayList<Zone> zones;
+    private ArrayList<Node> nodes;
     private int clientCount;
 }

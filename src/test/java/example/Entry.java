@@ -7,15 +7,15 @@ import com.datastax.driver.core.Session;
 import core.client.ClientInvokeResponse;
 import core.control.ControlConfig;
 import core.control.Controller;
-import core.db.Cassandra;
-import core.db.Zone;
+import core.db.Node;
 import core.model.ModelStepResponse;
 import core.record.Operation;
 import core.record.Recorder;
-import example.bank.BankClientCreator;
-import example.write_client.RWRequest;
-import example.write_client.ReadAndWriteClientCreator;
-import example.write_client.ReadAndWriteClientModel;
+import example.cassandra.read_write_client.ReadAndWriteDoubleClientCreator;
+import example.oceanbase.bank.BankClientCreator;
+import example.oceanbase.read_write_client.RWRequest;
+import example.oceanbase.read_write_client.ReadAndWriteClientCreator;
+import example.oceanbase.read_write_client.ReadAndWriteClientModel;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import util.Constant;
@@ -32,14 +32,29 @@ public class Entry {
     Constant constant = new Constant();
 
     @Test
+    public void CassandraRWTest() {
+        constant.Init();
+        ArrayList<Node> nodes = new ArrayList<>();
+        nodes.add(new Node("192.168.62.7", 9042, "root", "root"));
+        nodes.add(new Node("192.168.62.8", 9042, "root", "root"));
+        nodes.add(new Node("192.168.62.9", 9042, "root", "root"));
+        Recorder recorder = new Recorder("output/cassandra/read_write_client/", "history1.txt");
+        ControlConfig controlConfig = new ControlConfig("Cassandra", nodes, 3);
+//        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
+        Controller controller = new Controller(controlConfig, new ReadAndWriteDoubleClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
+//        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
+        controller.Run();
+    }
+
+    @Test
     public void BankClientMainTest() {
         constant.Init();
-        ArrayList<Zone> zones = new ArrayList<>();
-        zones.add(new Zone("192.168.62.7", 2881, "root", "root"));
-        zones.add(new Zone("192.168.62.8", 2881, "root", "root"));
-        zones.add(new Zone("192.168.62.9", 2881, "root", "root"));
-        Recorder recorder = new Recorder("output/bank_client/", "history1.txt");
-        ControlConfig controlConfig = new ControlConfig("Oceanbase", zones, 3);
+        ArrayList<Node> nodes = new ArrayList<>();
+        nodes.add(new Node("192.168.62.7", 2881, "root", "root"));
+        nodes.add(new Node("192.168.62.8", 2881, "root", "root"));
+        nodes.add(new Node("192.168.62.9", 2881, "root", "root"));
+        Recorder recorder = new Recorder("output/oceanbase/bank_client/", "history1.txt");
+        ControlConfig controlConfig = new ControlConfig("Oceanbase", nodes, 3);
 //        Controller controller = new Controller(controlConfig, new BankClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
         Controller controller = new Controller(controlConfig, new BankClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
 //        Controller controller = new Controller(controlConfig, new BankClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
@@ -49,12 +64,12 @@ public class Entry {
     @Test
     public void ReadAndWriteClientMainTest() {
         constant.Init();
-        ArrayList<Zone> zones = new ArrayList<>();
-        zones.add(new Zone("192.168.62.7", 2881, "root", "root"));
-        zones.add(new Zone("192.168.62.8", 2881, "root", "root"));
-        zones.add(new Zone("192.168.62.9", 2881, "root", "root"));
-        Recorder recorder = new Recorder("output/read_write_client/", "history1.txt");
-        ControlConfig controlConfig = new ControlConfig("Oceanbase", zones, 3);
+        ArrayList<Node> nodes = new ArrayList<>();
+        nodes.add(new Node("192.168.62.7", 2881, "root", "root"));
+        nodes.add(new Node("192.168.62.8", 2881, "root", "root"));
+        nodes.add(new Node("192.168.62.9", 2881, "root", "root"));
+        Recorder recorder = new Recorder("output/oceanbase/read_write_client/", "history1.txt");
+        ControlConfig controlConfig = new ControlConfig("Oceanbase", nodes, 3);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
         Controller controller = new Controller(controlConfig, new ReadAndWriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
@@ -79,10 +94,12 @@ public class Entry {
 //        String command = "iptables -D INPUT 1";
 //        String command = "iptables -I INPUT -s 192.168.62.7 -j DROP\n" +
 //                "iptables -I INPUT -s 192.168.62.9 -j DROP";
-        String command = "rm -rf /var/lib/cassandra/data\nsystemctl restart cassandra";
+//        String command = "rm -rf /var/lib/cassandra/data\nsystemctl restart cassandra";
+        String command = "systemctl start cassandra";
+//        String command = "systemctl stop cassandra";
         for(String host: observers) {
             try {
-                Support.ExecuteCommand(new Zone(host, 2881, "root", "root"), command);
+                Support.ExecuteCommand(new Node(host, 2881, "root", "root"), command);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -99,23 +116,17 @@ public class Entry {
 
     @Test
     public void Test() {
-        ArrayList<Zone> zones = new ArrayList<>();
-        zones.add(new Zone("192.168.62.7", 2881, "root", "root"));
-        zones.add(new Zone("192.168.62.8", 2881, "root", "root"));
-        zones.add(new Zone("192.168.62.9", 2881, "root", "root"));
-        Cassandra cassandra = new Cassandra();
-//        for(Zone zone: zones)
-//            cassandra.SetUp(zone);
-        cassandra.SetConfig(zones);
+        String s = "" + 1 + 103;
+        System.out.println(s);
     }
 
     @Test
     public void CassandraDemo() {
         Cluster cluster = Cluster.builder().addContactPoint("192.168.62.7").withPort(9042).build();
-        Session session = cluster.connect();
-        ResultSet rs = session.execute("select release_version from system.local");
+        Session session = cluster.connect("t");
+        ResultSet rs = session.execute("select num1 from rw where id=0;");
         Row row = rs.one();
-        System.out.println("RELEASE VERSION: " + row.getString("release_version"));
+        System.out.println(row.getInt(0));
         session.close();
         cluster.close();
     }

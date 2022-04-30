@@ -1,10 +1,12 @@
 package core.control;
 
+import core.checker.linearizability.Op;
 import core.client.Client;
 import core.client.ClientCreator;
 import core.client.ClientInvokeResponse;
+import core.client.ClientRequest;
 import core.db.DB;
-import core.db.Zone;
+import core.db.Node;
 import core.nemesis.Nemesis;
 import core.nemesis.NemesisGenerator;
 import core.nemesis.NemesisGenerators;
@@ -15,12 +17,12 @@ import core.record.Recorder;
 import lombok.extern.slf4j.Slf4j;
 import util.Constant;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static core.checker.checker.Operation.Type.*;
 
 
 @Slf4j
@@ -36,8 +38,8 @@ public class Controller {
     public Controller(ControlConfig config, ClientCreator clientCreator, String nemesisNames, Recorder recorder) {
         this.config = config;
         clients = new ArrayList<>();
-        for(Zone zone: config.getZones())
-            clients.add(clientCreator.Create(zone));
+        for(Node node : config.getNodes())
+            clients.add(clientCreator.Create(node));
         this.generators = NemesisGenerators.ParseNemesisGenerators(nemesisNames);
         this.lock = new ReentrantReadWriteLock();
         this.recorder = recorder;
@@ -46,8 +48,8 @@ public class Controller {
     public void Run() {
 
         // TODO 这里的异常选择怎样处理
-        SetUpDB();
-        SetUpClient();
+//        SetUpDB();        // TODO 删掉
+        SetUpClient();          // TODO 这里有异常必须终止 后面都跑不了
 
         int threadNum = this.config.getClientCount();
         CountDownLatch cdl = new CountDownLatch(threadNum);
@@ -59,12 +61,12 @@ public class Controller {
             }).start();
         }
 
-        Thread nemesisThread = new Thread(this::DispatchNemesis);
-        nemesisThread.start();
+//        Thread nemesisThread = new Thread(this::DispatchNemesis);
+//        nemesisThread.start();
 
         try {
             cdl.await();
-            nemesisThread.join();
+//            nemesisThread.join();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -79,24 +81,21 @@ public class Controller {
         DB db = Constant.GetDB(this.config.getDbName());
         if(db == null)
             return;
-        for(Zone zone: this.config.getZones()) {
-            Exception exception = db.SetUp(zone);
+        for(Node node : this.config.getNodes()) {
+            Exception exception = db.SetUp(node);
             if(exception != null)
                 log.error(exception.getMessage());
         }
-        db.SetConfig(this.config.getZones());
+        db.SetConfig(this.config.getNodes());
     }
 
     private void SetUpClient() {
-        ArrayList<Zone> zones = this.config.getZones();
-        for(int i = 0; i < zones.size(); i++) {
-            Zone zone = zones.get(i);
+        ArrayList<Node> nodes = this.config.getNodes();
+        for(int i = 0; i < nodes.size(); i++) {
+            Node node = nodes.get(i);
             try {
-                Connection connection = DriverManager.getConnection(zone.getOceanBaseURL(), zone.getUsername(), zone.getPassword());
-                this.clients.get(i).setConnection(connection);
-                log.info("Set up client in " + zone.getIp());
-                for(Client client: this.clients)
-                    client.SetUp();
+                log.info("Set up client in " + node.getIp());
+                this.clients.get(i).SetUp(node);
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -107,7 +106,6 @@ public class Controller {
         for(Client client: this.clients) {
             try {
                 client.TearDown();
-                client.getConnection().close();
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -122,7 +120,7 @@ public class Controller {
 
             if(generators.HasNext()) {
                 NemesisGenerator nemesisGenerator = generators.Next();
-                ArrayList<NemesisOperation> operations = nemesisGenerator.Generate(this.config.getZones());
+                ArrayList<NemesisOperation> operations = nemesisGenerator.Generate(this.config.getNodes());
                 CountDownLatch cdl = new CountDownLatch(operations.size());
 
                 for(NemesisOperation operation: operations) {
@@ -145,7 +143,7 @@ public class Controller {
     }
 
     private void OnNemesis(NemesisOperation nemesisOperation) {
-        String ip = nemesisOperation.getZone().getIp();
+        String ip = nemesisOperation.getNode().getIp();
         Nemesis nemesis = Constant.GetNemesis(nemesisOperation.getNemesisName());
         if(nemesis == null) {
             log.warn("Nemesis " + nemesisOperation.getNemesisName() + " hasn't been registered!");
@@ -154,7 +152,7 @@ public class Controller {
 
         log.info("Nemesis " + nemesis.Name() + " is running to " + ip + "...");
 //        this.recorder.RecordHistory();      // TODO Nemesis Invoke Operation
-        Exception exception = nemesis.Invoke(nemesisOperation.getZone(), nemesisOperation.getInvokeArgs());
+        Exception exception = nemesis.Invoke(nemesisOperation.getNode(), nemesisOperation.getInvokeArgs());
         if(exception != null)
             log.error("Run nemesis " + nemesis.Name() + " failed: " + exception.getMessage());
 
@@ -168,7 +166,7 @@ public class Controller {
 
         log.info("Nemesis " + nemesis.Name() + " in "+ ip +" is recovering...");
 //        this.recorder.RecordHistory();      // TODO Nemesis Recover Operation
-        exception = nemesis.Recover(nemesisOperation.getZone(), nemesisOperation.getRecoverArgs());        // TODO maybe retry it many times in a specific interval
+        exception = nemesis.Recover(nemesisOperation.getNode(), nemesisOperation.getRecoverArgs());        // TODO maybe retry it many times in a specific interval
         if(exception != null)
             log.error("Recover nemesis " + nemesis.Name() + " failed: " + exception.getMessage());
     }
@@ -176,15 +174,19 @@ public class Controller {
     private void InvokeClientWithRecord(Client client) {
         int threadId = (int) Thread.currentThread().getId();
         for(int i = 0; i < client.getRequestCount(); i++) {
-            Object request = client.NextRequest();
-            Operation<?> operation = new Operation<>(i, threadId, ActionEnum.InvokeOperation, new Date(), request);
-            this.recorder.RecordHistory(operation);
-            log.info(operation.toString());
+            ClientRequest request = client.NextRequest();
+            // TODO 时间我这边还用传吗
+            Op op = new Op(Integer.valueOf("" + i + threadId), request.getFunction(), INVOKE, request.getValue());
+            this.recorder.RecordHistory(op);
+            log.info(op.toString());
 
             ClientInvokeResponse<?> response = client.Invoke(request);
-            operation = new Operation<>(i, threadId, ActionEnum.ResponseOperation, new Date(), response);
-            this.recorder.RecordHistory(operation);
-            log.info(operation.toString());
+            if(response.isSuccess())
+                op = new Op(Integer.valueOf("" + i + threadId), request.getFunction(), OK, response.getNewState());
+            else
+                op = new Op(Integer.valueOf("" + i + threadId), request.getFunction(), FAIL, response.getNewState());
+            this.recorder.RecordHistory(op);
+            log.info(op.toString());
         }
     }
 }

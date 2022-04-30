@@ -1,6 +1,6 @@
 package core.nemesis;
 
-import core.db.Zone;
+import core.db.Node;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 public class NemesisOperation {
 
     private String nemesisName;
-    private Zone zone;
+    private Node node;
     private Duration runTime;
     private Map<String, String> invokeArgs;
     private Map<String, String> recoverArgs;

@@ -1,12 +1,12 @@
 package core.nemesis;
 
-import core.db.Zone;
+import core.db.Node;
 
 import java.util.ArrayList;
 
 public interface NemesisGenerator {
 
-    // generator对所有zone产生nemesis
-    ArrayList<NemesisOperation> Generate(ArrayList<Zone> zones);
+    // generator对所有node产生nemesis
+    ArrayList<NemesisOperation> Generate(ArrayList<Node> nodes);
 
 }

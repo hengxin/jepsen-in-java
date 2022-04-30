@@ -3,7 +3,7 @@ package core.checker.linearizability;
 import core.checker.checker.Operation;
 import core.client.ClientInvokeResponse;
 import core.record.ActionEnum;
-import example.write_client.RWRequest;
+import example.oceanbase.read_write_client.RWRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

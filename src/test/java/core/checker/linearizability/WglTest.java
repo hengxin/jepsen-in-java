@@ -4,7 +4,7 @@ import core.checker.checker.Operation;
 import core.checker.model.CASRegister;
 import core.checker.model.Model;
 import core.checker.model.Register;
-import example.write_client.RWRequest;
+import example.oceanbase.read_write_client.RWRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.bpsm.edn.parser.Parseable;

@@ -1,27 +1,16 @@
 package core.checker.util;
 
-import com.panayotis.gnuplot.JavaPlot;
-import com.panayotis.gnuplot.dataset.DataSet;
 import core.checker.checker.Operation;
 import core.checker.exception.NoPointsException;
-import core.checker.linearizability.Op;
 import core.checker.vo.Plot;
 import core.checker.vo.TestInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
-import org.icepear.echarts.Bar;
-import org.icepear.echarts.Option;
-import org.icepear.echarts.render.Engine;
-import org.icepear.echarts.serializer.EChartsSerializer;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.Axis;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.FastScatterPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -31,21 +20,17 @@ import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.VerticalAlignment;
 import org.jfree.data.Range;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import util.Store;
 import util.Util;
 
-import java.awt.*;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j

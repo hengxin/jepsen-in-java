@@ -1,6 +1,7 @@
 package core.record;
 
 import com.alibaba.fastjson.JSON;
+import core.checker.linearizability.Op;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
@@ -29,7 +30,7 @@ public class Recorder {
         }
     }
 
-    public Exception RecordHistory(Operation<?> operation) {
+    public Exception RecordHistory(Op operation) {
         try {
             String json = JSON.toJSONStringWithDateFormat(operation, "yyyy-MM-dd HH:mm:ss.SSS");
             this.lock.writeLock().lock();
@@ -41,13 +42,11 @@ public class Recorder {
             return null;
         } catch (Exception e) {
             log.error(e.getMessage());
+            log.error(operation.toString());
             return e;
         } finally {
-            try {
+            if(this.lock.getWriteHoldCount() == 1)
                 this.lock.writeLock().unlock();
-            } catch (IllegalMonitorStateException e) {
-                log.warn("Error before lock, object to json wrong.");
-            }
         }
     }
 }

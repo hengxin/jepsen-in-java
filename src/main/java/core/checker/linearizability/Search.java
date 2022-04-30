@@ -2,11 +2,9 @@ package core.checker.linearizability;
 
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 @Slf4j
 public abstract class Search {

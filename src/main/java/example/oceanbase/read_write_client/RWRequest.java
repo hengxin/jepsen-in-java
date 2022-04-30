@@ -1,4 +1,4 @@
-package example.write_client;
+package example.oceanbase.read_write_client;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
