@@ -1,10 +1,12 @@
 package core.checker.exception;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class IllegalHistory extends Exception {
     private List<Map<?, ?>> reads;

@@ -65,7 +65,11 @@ public class Op extends Operation {
         this.index = op.getIndex();
     }
     public Op(Operation op){
-        super(op);
+        this.process = op.getProcess();
+        this.f = op.getF();
+        this.type = op.getType();
+        this.value = op.getValue();
+        this.index = op.getIndex();
     }
 
 //    public Op(core.record.Operation op) {

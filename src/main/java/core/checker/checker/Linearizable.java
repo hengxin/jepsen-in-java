@@ -1,6 +1,7 @@
 package core.checker.checker;
 
 import core.checker.linearizability.Op;
+import core.checker.linearizability.Report;
 import core.checker.linearizability.Wgl;
 import core.checker.model.Model;
 import core.checker.vo.Result;
@@ -10,6 +11,8 @@ import util.Store;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,15 +51,20 @@ public class Linearizable implements Checker {
                 TestInfo testInfo = new TestInfo((String) test.getOrDefault("name", ""), (LocalDateTime) test.get("start-time"));
                 String[] args = new String[]{(String) opts.getOrDefault("subdirectory", ""), "linear.svg"};
                 File file = Store.makePathIfNotExists(testInfo, args);
-                String path = file.getCanonicalPath();
-                //                ClojureCaller.call("knossos.linear.report", "render-analysis!", history, a, path);
+                String path = file.getPath();
+                Report.renderAnalysis(history.stream().map(Op::new).collect(Collectors.toList()), a, path);
             } catch (Exception e) {
                 log.warn(e + " Error rendering linearizability analysis");
             }
         }
 
-        a.put("final-paths", ((List) a.get("final-paths")).subList(0, 10));
-        a.put("configs", ((List) a.get("configs")).subList(0, 10));
-        return new Result();//TODO
+        int size=((HashSet<?>) a.get("final-paths")).size();
+        a.put("final-paths", (new ArrayList<>((HashSet<?>) a.get("final-paths"))).subList(0, Math.min(10,size)));
+        size=((List) a.getOrDefault("configs",new ArrayList<>())).size();
+        a.put("configs", ((List) a.getOrDefault("configs",new ArrayList<>())).subList(0, Math.min(10,size)));
+        Result result = new Result(a.get("valid?"));
+        result.setRes(a);
+        return result;
+
     }
 }

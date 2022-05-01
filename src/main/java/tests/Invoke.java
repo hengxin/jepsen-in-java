@@ -2,7 +2,9 @@ package tests;
 
 import core.checker.checker.Operation;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class Invoke extends Operation {
     private Type type;

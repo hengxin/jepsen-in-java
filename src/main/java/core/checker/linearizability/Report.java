@@ -659,7 +659,7 @@ public class Report {
 
 
         try {
-            Path path=Path.of("report",fileName);
+            Path path=Path.of(fileName);
             File file=path.toFile();
             file.getParentFile().mkdirs();
             FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8);

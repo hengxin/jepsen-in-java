@@ -40,7 +40,7 @@ public class Cassandra implements DB {
         for(Node node : nodes)
             seedsBuilder.append(node.getIp()).append(",");
         String seeds = seedsBuilder.substring(0, seedsBuilder.length() - 1);
-        String cluster_name = "GraduationDesign";       // TODO 自定义？不能有空格不然shell参数格式有误
+        String cluster_name = "GraduationDesign";       // TODO 自定义？不能有空格不然shell参数 格式有误
         for(Node node : nodes) {
             Exception exception = SendFile(node, "src/main/resources/cassandra/cluster_config.sh", "/root/");
             if(exception != null)
