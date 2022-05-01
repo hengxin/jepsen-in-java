@@ -3,7 +3,6 @@ package tests.long_fork;
 import core.checker.checker.Operation;
 import core.checker.exception.IllegalHistory;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import util.Util;
 
 import java.util.*;

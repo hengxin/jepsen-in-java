@@ -4,20 +4,17 @@ import core.checker.checker.Operation;
 import core.checker.model.CASRegister;
 import core.checker.model.Model;
 import core.checker.model.Register;
-import example.oceanbase.read_write_client.RWRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.bpsm.edn.parser.Parseable;
 import us.bpsm.edn.parser.Parser;
 import us.bpsm.edn.parser.Parsers;
-import util.Support;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static us.bpsm.edn.Keyword.newKeyword;
@@ -208,15 +205,15 @@ class WglTest {
     }
 
 
-    @Test
-    void testHistory() {
-        Model model = new Register(null);
-        List<core.record.Operation> ops = Support.TxtToOperations("output/read_write_client/history1.txt", RWRequest.class);
-        List<Op> history = ops.stream().map(o -> new Op(o)).collect(Collectors.toList());
-        Map<String, Object> a = Wgl.analysis(model, history);
-        String res = "";
-
-    }
+//    @Test
+//    void testHistory() {
+//        Model model = new Register(null);
+//        List<core.record.Operation> ops = Support.TxtToOperations("output/read_write_client/history1.txt", RWRequest.class);
+//        List<Op> history = ops.stream().map(o -> new Op(o)).collect(Collectors.toList());
+//        Map<String, Object> a = Wgl.analysis(model, history);
+//        String res = "";
+//
+//    }
 
 
 }

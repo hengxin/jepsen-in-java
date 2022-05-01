@@ -1,9 +1,6 @@
 package core.checker.linearizability;
 
 import core.checker.checker.Operation;
-import core.client.ClientInvokeResponse;
-import core.record.ActionEnum;
-import example.oceanbase.read_write_client.RWRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,28 +68,28 @@ public class Op extends Operation {
         super(op);
     }
 
-    public Op(core.record.Operation op) {
-        this.process = Integer.parseInt(op.getRequestId().toString() + op.getThreadId().toString());
-        ActionEnum action = op.getAction();
-        if (action == ActionEnum.InvokeOperation) {
-            this.type = Type.INVOKE;
-            RWRequest data = (RWRequest) op.getData();
-            if (data.getAction().equals("read")) {
-                this.f = F.READ;
-            } else if (data.getAction().equals("write")) {
-                this.f = F.WRITE;
-            }
-            this.value = data.getValue();
-        } else if (action == ActionEnum.ResponseOperation) {
-            ClientInvokeResponse data = (ClientInvokeResponse) op.getData();
-            if (data.isSuccess()) {
-                this.type = Type.OK;
-            } else {
-                this.type = Type.FAIL;
-            }
-            this.value = data.getNewState();
-        }
-    }
+//    public Op(core.record.Operation op) {
+//        this.process = Integer.parseInt(op.getRequestId().toString() + op.getThreadId().toString());
+//        ActionEnum action = op.getAction();
+//        if (action == ActionEnum.InvokeOperation) {
+//            this.type = Type.INVOKE;
+//            RWRequest data = (RWRequest) op.getData();
+//            if (data.getAction().equals("read")) {
+//                this.f = F.READ;
+//            } else if (data.getAction().equals("write")) {
+//                this.f = F.WRITE;
+//            }
+//            this.value = data.getValue();
+//        } else if (action == ActionEnum.ResponseOperation) {
+//            ClientInvokeResponse data = (ClientInvokeResponse) op.getData();
+//            if (data.isSuccess()) {
+//                this.type = Type.OK;
+//            } else {
+//                this.type = Type.FAIL;
+//            }
+//            this.value = data.getNewState();
+//        }
+//    }
 
 
     @Override

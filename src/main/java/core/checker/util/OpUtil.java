@@ -1,10 +1,6 @@
 package core.checker.util;
 
 import core.checker.checker.Operation;
-import core.checker.linearizability.Op;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class OpUtil {
     public static boolean isOk(Operation operation) {

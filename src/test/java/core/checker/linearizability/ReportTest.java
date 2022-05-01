@@ -7,17 +7,15 @@ import org.junit.jupiter.api.Test;
 import us.bpsm.edn.parser.Parseable;
 import us.bpsm.edn.parser.Parser;
 import us.bpsm.edn.parser.Parsers;
-import util.Store;
 
-import java.io.*;
-import java.nio.file.Path;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static us.bpsm.edn.Keyword.newKeyword;
 
 class ReportTest {

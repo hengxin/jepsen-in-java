@@ -1,6 +1,5 @@
 package core.checker.checker;
 
-import core.checker.linearizability.Op;
 import core.checker.model.Model;
 import core.checker.util.OpUtil;
 import core.checker.vo.Result;

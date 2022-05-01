@@ -4,18 +4,13 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import core.client.ClientInvokeResponse;
+import core.checker.model.Register;
 import core.control.ControlConfig;
 import core.control.Controller;
 import core.db.Node;
-import core.model.ModelStepResponse;
-import core.record.Operation;
 import core.record.Recorder;
 import example.cassandra.read_write_client.ReadAndWriteDoubleClientCreator;
-import example.oceanbase.bank.BankClientCreator;
-import example.oceanbase.read_write_client.RWRequest;
 import example.oceanbase.read_write_client.ReadAndWriteClientCreator;
-import example.oceanbase.read_write_client.ReadAndWriteClientModel;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import util.Constant;
@@ -41,23 +36,9 @@ public class Entry {
         Recorder recorder = new Recorder("output/cassandra/read_write_client/", "history1.txt");
         ControlConfig controlConfig = new ControlConfig("Cassandra", nodes, 3);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
-        Controller controller = new Controller(controlConfig, new ReadAndWriteDoubleClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
+        Controller controller = new Controller(controlConfig, new ReadAndWriteDoubleClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder,
+                                "wgl", new Register(0));
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
-        controller.Run();
-    }
-
-    @Test
-    public void BankClientMainTest() {
-        constant.Init();
-        ArrayList<Node> nodes = new ArrayList<>();
-        nodes.add(new Node("192.168.62.7", 2881, "root", "root"));
-        nodes.add(new Node("192.168.62.8", 2881, "root", "root"));
-        nodes.add(new Node("192.168.62.9", 2881, "root", "root"));
-        Recorder recorder = new Recorder("output/oceanbase/bank_client/", "history1.txt");
-        ControlConfig controlConfig = new ControlConfig("Oceanbase", nodes, 3);
-//        Controller controller = new Controller(controlConfig, new BankClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
-        Controller controller = new Controller(controlConfig, new BankClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
-//        Controller controller = new Controller(controlConfig, new BankClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
         controller.Run();
     }
 
@@ -71,11 +52,11 @@ public class Entry {
         Recorder recorder = new Recorder("output/oceanbase/read_write_client/", "history1.txt");
         ControlConfig controlConfig = new ControlConfig("Oceanbase", nodes, 3);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
-        Controller controller = new Controller(controlConfig, new ReadAndWriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder);
+        Controller controller = new Controller(controlConfig, new ReadAndWriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder,
+                                "wgl", new Register(0));
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION);
         controller.Run();
     }
-
 
     @Test
     public void ExecSeparately() {
@@ -104,14 +85,6 @@ public class Entry {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Test
-    public void TestCheck() {
-        ArrayList<Operation> operations = Support.TxtToOperations("output/read_write_client/history1.txt", RWRequest.class);
-        ReadAndWriteClientModel model = new ReadAndWriteClientModel();
-        ModelStepResponse<?> response = model.Step(0, operations.get(1).getData(), (ClientInvokeResponse<?>) operations.get(3).getData());
-        System.out.println(response.toString());
     }
 
     @Test

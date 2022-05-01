@@ -1,9 +1,7 @@
 package core.checker.model;
 
 import core.checker.checker.Operation;
-import core.checker.linearizability.CacheConfig;
 import lombok.Data;
-import lombok.val;
 
 import java.util.List;
 

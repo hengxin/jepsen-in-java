@@ -1,7 +1,5 @@
 package core.checker.checker;
 
-import core.checker.checker.Operation;
-import core.checker.checker.UnhandledExceptions;
 import core.checker.vo.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import static core.checker.checker.Operation.F.FOO;
-import static core.checker.checker.Operation.F.valueOf;
 
 class UnhandledExceptionsTest {
 

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CheckerUtilTest {
     CheckerUtil checkerUtil = new CheckerUtil();

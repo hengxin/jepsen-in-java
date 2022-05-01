@@ -1,7 +1,5 @@
 package core.checker.checker;
 
-import core.checker.checker.Operation;
-import core.checker.checker.Stats;
 import core.checker.vo.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

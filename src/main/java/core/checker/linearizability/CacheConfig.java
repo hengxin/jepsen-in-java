@@ -1,6 +1,5 @@
 package core.checker.linearizability;
 
-import core.checker.checker.Operation;
 import core.checker.model.Model;
 import lombok.AllArgsConstructor;
 import lombok.Data;

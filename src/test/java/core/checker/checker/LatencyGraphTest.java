@@ -1,15 +1,10 @@
 package core.checker.checker;
 
-import core.checker.linearizability.Op;
 import core.checker.vo.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import javax.print.DocFlavor;
-import javax.swing.event.ListDataEvent;
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class LatencyGraphTest {
     public List<Operation> history;

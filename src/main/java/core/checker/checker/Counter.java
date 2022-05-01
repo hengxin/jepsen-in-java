@@ -4,7 +4,10 @@ import core.checker.linearizability.History;
 import core.checker.util.OpUtil;
 import core.checker.vo.Result;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A counter starts at zero; add operations should increment it by that much,

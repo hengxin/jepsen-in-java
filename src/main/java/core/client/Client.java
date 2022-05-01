@@ -3,8 +3,6 @@ package core.client;
 import core.db.Node;
 import lombok.Data;
 
-import java.sql.Connection;
-
 
 @Data
 abstract public class Client {

@@ -6,9 +6,7 @@ import core.checker.checker.CheckerUtil;
 import core.checker.checker.Compose;
 import core.checker.checker.Operation;
 import core.checker.util.OpUtil;
-import core.checker.vo.Result;
 import tests.Invoke;
-import tests.causal_reverse.CausalOp;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -3,7 +3,6 @@ package core.checker.vo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.checkerframework.common.value.qual.ArrayLen;
 
 import java.util.List;
 import java.util.Map;

@@ -1,6 +1,5 @@
 package core.checker.checker;
 
-import core.checker.linearizability.GKOp;
 import core.checker.vo.Result;
 import org.junit.jupiter.api.Test;
 

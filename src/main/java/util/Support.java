@@ -1,13 +1,9 @@
 package util;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jcraft.jsch.*;
-import core.client.Client;
-import core.client.ClientInvokeResponse;
+import core.checker.checker.Operation;
 import core.db.Node;
-import core.record.ActionEnum;
-import core.record.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
@@ -50,7 +46,8 @@ public class Support {
 
 
     // 用户自定义的Operation的request类型传进来
-    public static ArrayList<Operation> TxtToOperations(String filePath, Class requestClass) {
+    public static ArrayList<Operation> TxtToOperations(String filePath) {
+//    public static ArrayList<Operation> TxtToOperations(String filePath, Class requestClass) {
         ArrayList<Operation> operations = new ArrayList<>();
         String content = TxtToString(filePath);
         if(content.equals(""))
@@ -58,10 +55,11 @@ public class Support {
         String[] strings = content.split("\n");
         for(String str: strings) {
             Operation operation = JSONObject.parseObject(str, Operation.class);     // 在这里data会被反序列化成JsonObject类型
-            if(operation.getAction() == ActionEnum.InvokeOperation)
-                operation.setData(JSONObject.parseObject(JSON.toJSONString(operation.getData()), requestClass));
-            else
-                operation.setData(JSONObject.parseObject(JSON.toJSONString(operation.getData()), ClientInvokeResponse.class));
+            // TODO 不知道会不会有问题
+//            if(operation.getAction() == ActionEnum.InvokeOperation)
+//                operation.setData(JSONObject.parseObject(JSON.toJSONString(operation.getData()), requestClass));
+//            else
+//                operation.setData(JSONObject.parseObject(JSON.toJSONString(operation.getData()), ClientInvokeResponse.class));
             operations.add(operation);
         }
         return operations;

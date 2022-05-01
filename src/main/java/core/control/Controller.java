@@ -1,6 +1,8 @@
 package core.control;
 
-import core.checker.linearizability.Op;
+import core.checker.checker.Linearizable;
+import core.checker.checker.Operation;
+import core.checker.model.Model;
 import core.client.Client;
 import core.client.ClientCreator;
 import core.client.ClientInvokeResponse;
@@ -11,14 +13,15 @@ import core.nemesis.Nemesis;
 import core.nemesis.NemesisGenerator;
 import core.nemesis.NemesisGenerators;
 import core.nemesis.NemesisOperation;
-import core.record.ActionEnum;
-import core.record.Operation;
 import core.record.Recorder;
 import lombok.extern.slf4j.Slf4j;
 import util.Constant;
+import util.Support;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -33,9 +36,10 @@ public class Controller {
     private NemesisGenerators generators;
     private ReentrantReadWriteLock lock;
     private Recorder recorder;
-//    private Model model;
+    private Linearizable linearizable;
 
-    public Controller(ControlConfig config, ClientCreator clientCreator, String nemesisNames, Recorder recorder) {
+    public Controller(ControlConfig config, ClientCreator clientCreator, String nemesisNames, Recorder recorder,
+                      String checkAlgorithm, Model model) {
         this.config = config;
         clients = new ArrayList<>();
         for(Node node : config.getNodes())
@@ -43,14 +47,17 @@ public class Controller {
         this.generators = NemesisGenerators.ParseNemesisGenerators(nemesisNames);
         this.lock = new ReentrantReadWriteLock();
         this.recorder = recorder;
+        this.linearizable = new Linearizable(new HashMap(Map.of("algorithm", checkAlgorithm, "model", model)));
     }
 
     public void Run() {
 
         // TODO 这里的异常选择怎样处理
-//        SetUpDB();        // TODO 删掉
+//        SetUpDB();        // TODO 删掉注释
         SetUpClient();          // TODO 这里有异常必须终止 后面都跑不了
 
+
+        LocalDateTime startTime = LocalDateTime.now();
         int threadNum = this.config.getClientCount();
         CountDownLatch cdl = new CountDownLatch(threadNum);
         for(int i = 0; i < threadNum; i++) {
@@ -70,11 +77,12 @@ public class Controller {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-
-
-
         TearDownClient();
         // TODO TearDownDB()?
+
+        // TODO 感觉这里很多用map的应该抽象成类的
+        ArrayList<Operation> operations = Support.TxtToOperations(this.recorder.getRecordFilePath());
+        this.linearizable.check(new HashMap(Map.of("name", this.config.getDbName(), "start-time", startTime)), operations, null);
     }
 
     private void SetUpDB() {
@@ -175,18 +183,17 @@ public class Controller {
         int threadId = (int) Thread.currentThread().getId();
         for(int i = 0; i < client.getRequestCount(); i++) {
             ClientRequest request = client.NextRequest();
-            // TODO 时间我这边还用传吗
-            Op op = new Op(Integer.valueOf("" + i + threadId), request.getFunction(), INVOKE, request.getValue());
-            this.recorder.RecordHistory(op);
-            log.info(op.toString());
+            Operation operation = new Operation(Integer.parseInt("" + i + threadId), INVOKE, request.getValue(), request.getFunction(), System.currentTimeMillis());
+            this.recorder.RecordHistory(operation);
+            log.info(operation.toString());
 
             ClientInvokeResponse<?> response = client.Invoke(request);
             if(response.isSuccess())
-                op = new Op(Integer.valueOf("" + i + threadId), request.getFunction(), OK, response.getNewState());
+                operation = new Operation(Integer.parseInt("" + i + threadId), OK, response.getNewState(), request.getFunction(), System.currentTimeMillis());
             else
-                op = new Op(Integer.valueOf("" + i + threadId), request.getFunction(), FAIL, response.getNewState());
-            this.recorder.RecordHistory(op);
-            log.info(op.toString());
+                operation = new Operation(Integer.parseInt("" + i + threadId), FAIL, response.getNewState(), request.getFunction(), System.currentTimeMillis());
+            this.recorder.RecordHistory(operation);
+            log.info(operation.toString());
         }
     }
 }

@@ -1,7 +1,7 @@
 package core.record;
 
 import com.alibaba.fastjson.JSON;
-import core.checker.linearizability.Op;
+import core.checker.checker.Operation;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
@@ -30,9 +30,10 @@ public class Recorder {
         }
     }
 
-    public Exception RecordHistory(Op operation) {
+    public Exception RecordHistory(Operation operation) {
         try {
-            String json = JSON.toJSONStringWithDateFormat(operation, "yyyy-MM-dd HH:mm:ss.SSS");
+//            String json = JSON.toJSONStringWithDateFormat(operation, "yyyy-MM-dd HH:mm:ss.SSS");
+            String json = JSON.toJSONString(operation);
             this.lock.writeLock().lock();
             BufferedWriter bw = new BufferedWriter(new FileWriter(this.file, true));        // 追加写入
             bw.write(json);
@@ -48,5 +49,9 @@ public class Recorder {
             if(this.lock.getWriteHoldCount() == 1)
                 this.lock.writeLock().unlock();
         }
+    }
+
+    public String getRecordFilePath() {
+        return this.file.getParent();       // TODO没测
     }
 }

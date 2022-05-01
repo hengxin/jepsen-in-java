@@ -1,11 +1,8 @@
 package core.checker.checker;
 
-import core.checker.linearizability.Op;
 import core.checker.vo.Result;
-import util.Util;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**

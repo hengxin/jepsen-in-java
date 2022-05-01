@@ -1,13 +1,10 @@
 package core.checker.checker;
 
-import com.jcraft.jsch.MAC;
 import core.checker.vo.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class RateGraphTest {
 

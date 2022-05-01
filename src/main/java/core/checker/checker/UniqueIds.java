@@ -3,7 +3,10 @@ package core.checker.checker;
 import core.checker.util.OpUtil;
 import core.checker.vo.Result;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**

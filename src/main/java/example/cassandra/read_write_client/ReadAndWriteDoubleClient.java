@@ -8,7 +8,6 @@ import core.client.Client;
 import core.client.ClientInvokeResponse;
 import core.client.ClientRequest;
 import core.db.Node;
-import example.oceanbase.read_write_client.RWRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Random;

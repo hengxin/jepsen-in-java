@@ -1,5 +1,6 @@
 package core.checker.checker;
 
+import com.alibaba.fastjson.annotation.JSONType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JSONType(orders={"process", "type", "value", "f", "time"})
 public class Operation {
     private int process;
     private boolean isNemesis;
@@ -48,6 +50,14 @@ public class Operation {
         this.type = type;
         this.f = f;
         this.value = value;
+    }
+
+    public Operation(int process, Type type, Object value, F f, double time) {
+        this.process = process;
+        this.type = type;
+        this.value = value;
+        this.f = f;
+        this.time = time;
     }
 
     public Operation(int process, Type type, F f, Object value, Exception e, Object error) {
