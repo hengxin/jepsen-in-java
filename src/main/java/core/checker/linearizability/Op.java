@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Locale;
+import java.util.Objects;
 
 @Slf4j
 @Data
@@ -108,4 +109,17 @@ public class Op extends Operation {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Op op = (Op) o;
+        return process == op.process && index == op.index&& type == op.type && f == op.f && Objects.equals(value, op.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), process, type, f, value, index);
+    }
 }

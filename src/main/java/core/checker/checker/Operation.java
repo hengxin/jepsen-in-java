@@ -1,15 +1,12 @@
 package core.checker.checker;
 
-import com.jcraft.jsch.MAC;
-import core.checker.linearizability.Op;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Data
@@ -31,6 +28,8 @@ public class Operation {
     private Operation completion;
     private int index;
     private Map<String, Double> clockOffsets;
+    private int position;
+    Object link;
 
     public Operation(Operation operation) {
         this.process = operation.getProcess();
@@ -95,6 +94,19 @@ public class Operation {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Operation operation = (Operation) o;
+        return process == operation.process && index == operation.index && type == operation.type && Objects.equals(value, operation.value) && f == operation.f;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(process, type, value, f, index);
+    }
+
     public enum Type {
         INVOKE, INFO, OK, FAIL
     }
@@ -102,6 +114,6 @@ public class Operation {
     public enum F {
         START, STOP, READ, WRITE, CAS, ADD, TRANSFER, INC, TXN, RESUME_PD, RESUME_KV, RESUME_DB, START_PD, START_KV, START_DB,
         KILL_PD, KILL_KV, KILL_DB, PAUSE_DB, SHUFFLE_LEADER, SHUFFLE_REGION, RANDOM_MERGE, DEL_SHUFFLE_LEADER, DEL_SHUFFLE_REGION, DEL_RANDOM_MERGE,
-        SLOW_PRIMARY, STOP_PARTITION, CREATE_TABLE, INSERT, DRAIN, DEQUEUE, ENQUEUE, GENERATE, FOO, BAR
+        SLOW_PRIMARY, STOP_PARTITION, CREATE_TABLE, INSERT, DRAIN, DEQUEUE, ENQUEUE, GENERATE, FOO, BAR,RELEASE,ACQUIRE,READ_INIT
     }
 }

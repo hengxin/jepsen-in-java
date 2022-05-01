@@ -14,17 +14,22 @@ import java.util.stream.Collectors;
  *
  */
 public class SetFull implements Checker {
-    boolean linearizable = false;
-    private final Map checkerOpts;
+    private final Map<String, Object> checkerOpts;
 
     public SetFull(Map checkerOpts) {
         this.checkerOpts = checkerOpts;
     }
 
+    public SetFull() {
+        this.checkerOpts = new HashMap<>(Map.of(
+                "linearizable?", false
+        ));
+    }
+
     @Override
     public Result check(Map test, List<Operation> history, Map opts) {
         history = history.stream().filter(h -> h.getProcess() >= 0).collect(Collectors.toList());
-        Map<Object,SetFullElement> elements = new HashMap<>();
+        Map<Object, SetFullElement> elements = new HashMap<>();
         Map reads = new HashMap<>(), dups = new HashMap<>();
         for (Operation operation : history) {
             List<Map> res = red(elements, reads, dups, operation);
@@ -34,7 +39,7 @@ public class SetFull implements Checker {
         }
         elements = new TreeMap<>(elements);
 
-        Map<String, Object> setResults = CheckerUtil.setFullResults(checkerOpts, new ArrayList<SetFullElement>(elements.values()));
+        Map<String, Object> setResults = CheckerUtil.setFullResults(checkerOpts, new ArrayList<>(elements.values()));
         Object valid;
         if(!dups.isEmpty()){
             valid=false;
@@ -86,14 +91,18 @@ public class SetFull implements Checker {
                 }
                 for (Object val : valList) {
                     if (!newDups.containsKey(val)) {
-                        newDups.put(val, Collections.frequency(valList, val));
+                        int times = Collections.frequency(valList, val);
+                        if (times > 1) {
+                            newDups.put(val, times);
+                        }
+
                     }
                 }
 
 
                 dups.forEach((key, value) -> newDups.merge(key, (int) value, (v1, v2) -> v1 > v2 ? v1 : v2));
 
-                HashSet<?> vSet = new HashSet<>(new ArrayList<>(List.of(v)));
+                HashSet<?> vSet = new HashSet<>(valList);
                 for (Object element : elements.keySet()) {
                     SetFullElement state = elements.get(element);
                     if (vSet.contains(element)) {

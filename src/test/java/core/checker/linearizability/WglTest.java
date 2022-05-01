@@ -43,7 +43,7 @@ class WglTest {
 
     }
 
-    public List<Op> constructOps(String path) {
+    public   List<Op> constructOps(String path) {
         String edn = readEdn(path);
         Parseable pbr = Parsers.newParseable(edn);
         Parser p = Parsers.newParser(Parsers.defaultConfiguration());

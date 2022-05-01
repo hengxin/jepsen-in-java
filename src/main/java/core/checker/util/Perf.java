@@ -100,6 +100,20 @@ public class Perf {
         return res;
     }
 
+    public static Map<String, String> ns2Colors(List<String> qs) {
+        qs.sort(Comparator.reverseOrder());
+        Map<String, String> res = new HashMap<>();
+        List<String> colors = List.of("red", "orange", "purple", "blue", "green", "grey");
+        int i = 0;
+        for (String q : qs) {
+            i = i % colors.size();
+            res.put(q, colors.get(i));
+            i++;
+        }
+        return res;
+    }
+
+
 
     public static Map<Double, List<List<?>>> latencies2quantiles(long dt, List<Double> qs, List<List<?>> points) {
         for (double q : qs) {

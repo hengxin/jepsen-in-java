@@ -14,7 +14,7 @@ public class Analysis {
             path.add(new HashMap<>(p));
         }
         for (Op op : ops) {
-            Model model = (Model) path.get(0).get("model");
+            Model model = (Model) path.get(path.size()-1).get("model");
             Model newModel = model.step(op);
             path.add(new HashMap<>(Map.of(
                     "op", op,
@@ -48,7 +48,7 @@ public class Analysis {
         return res;
     }
 
-    static List<List<Op>> permutations(List<Op> ops) {
+    public static List<List<Op>> permutations(List<Op> ops) {
         List<List<Op>> ans = new ArrayList<>();
 
         // If empty
