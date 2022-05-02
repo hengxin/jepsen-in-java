@@ -23,10 +23,11 @@ public class History {
     }
 
     public static Op invocation(Map<Op, Op> pairIndex, Op op) {
+        if (op == null) return null;
         if (OpUtil.isInvoke(op)) {
             return op;
         } else {
-            return pairIndex.getOrDefault(op,null);
+            return pairIndex.getOrDefault(op, null);
         }
     }
 
@@ -235,7 +236,7 @@ public class History {
     }
 
     public static boolean isIndexed(List<Op> history) {
-        return history.isEmpty() || history.get(0).getIndex() >= 0;
+        return history.isEmpty() || (history.get(0).getIndex() >= 0 && !history.stream().map(Op::getIndex).allMatch(i -> i == 0));
     }
 
     public static void ensureIndex(List<Op> history) {

@@ -164,12 +164,13 @@ public class Wgl {
         Set<List<Map<String, Object>>> paths = new HashSet<>();
         for (CacheConfig config : configs) {
             BitSet linearized = config.getLinearized();
+            if (linearized.isEmpty()) continue;
             Model model = config.getModel();
             List<Op> curCall=new ArrayList<>(calls);
             curCall.removeIf(call -> linearized.get(call.getEntryId()));
             curCall = curCall.stream().map(pairIndex::get).collect(Collectors.toList());
             Map<String, Object> p = new HashMap<>();
-            p.put("op", pairIndex.getOrDefault(config.getOperation(), null));
+            p.put("op", pairIndex.get(config.getOperation()));
             p.put("model", model);
             List<Map<String, Object>> path = new ArrayList<>(List.of(p));
             Set<List<Map<String, Object>>> finalPaths = Analysis.finalPathsForConfig(path, finalOp, curCall);

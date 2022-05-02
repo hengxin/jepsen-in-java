@@ -58,8 +58,8 @@ public class Linearizable implements Checker {
             }
         }
 
-        int size=((HashSet<?>) a.get("final-paths")).size();
-        a.put("final-paths", (new ArrayList<>((HashSet<?>) a.get("final-paths"))).subList(0, Math.min(10,size)));
+        int size=((HashSet<?>) a.getOrDefault("final-paths",new HashSet<>())).size();
+        a.put("final-paths", (new ArrayList<>((HashSet<?>) a.getOrDefault("final-paths",new HashSet<>()))).subList(0, Math.min(10,size)));
         size=((List) a.getOrDefault("configs",new ArrayList<>())).size();
         a.put("configs", ((List) a.getOrDefault("configs",new ArrayList<>())).subList(0, Math.min(10,size)));
         Result result = new Result(a.get("valid?"));

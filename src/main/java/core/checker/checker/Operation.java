@@ -28,7 +28,7 @@ public class Operation {
     private double time;
     private double latency;
     private Operation completion;
-    private int index;
+    private int index=-1;
     private Map<String, Double> clockOffsets;
     private int position;
     Object link;

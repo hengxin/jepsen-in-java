@@ -93,9 +93,9 @@ public class Entry {
     public void Test() {
         // 还有个bad 是因为一开始的值未变0 所以一开始读出来是88是上个测试遗留下的值
 
-        ArrayList<Operation> operations = Support.TxtToOperations("output/oceanbase/read_write_client/good.txt");
+        ArrayList<Operation> operations = Support.TxtToOperations("output/oceanbase/read_write_client/bad.txt");
         Result result = new Linearizable(new HashMap(Map.of("algorithm", "wgl", "model", new Register(0))))
-                .check(new HashMap(Map.of("name", "oceanbase", "start-time", LocalDateTime.now())), operations, null);
+                .check(new HashMap(Map.of("name", "oceanbase", "start-time", LocalDateTime.now())), operations, new HashMap<>());
         System.out.println();
     }
 }

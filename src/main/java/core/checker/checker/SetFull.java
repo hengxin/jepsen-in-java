@@ -108,18 +108,6 @@ public class SetFull implements Checker {
                         elements.put(element, state.setFullReadAbsent(inv, operation));
                     }
                 }
-
-                //                Function<Object[], Object[]> updateAll = o -> {
-                //                    Map element = (Map) o[0];
-                //                    ISetFullElement state = (ISetFullElement) o[1];
-                //                    if (element.containsKey(finalV)) {
-                //                        state.setFullReadPresent(inv, operation);
-                //                    } else {
-                //                        state.setFullReadAbsent(inv, operation);
-                //                    }
-                //                    return new Object[]{element, state};
-                //                };
-                //                elements = Util.mapKv(updateAll, elements);
                 return List.of(elements, reads, newDups);
             }
         }
