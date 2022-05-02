@@ -3,6 +3,7 @@ package core.control;
 import core.checker.checker.Linearizable;
 import core.checker.checker.Operation;
 import core.checker.model.Model;
+import core.checker.vo.Result;
 import core.client.Client;
 import core.client.ClientCreator;
 import core.client.ClientInvokeResponse;
@@ -68,12 +69,12 @@ public class Controller {
             }).start();
         }
 
-//        Thread nemesisThread = new Thread(this::DispatchNemesis);
-//        nemesisThread.start();
+        Thread nemesisThread = new Thread(this::DispatchNemesis);
+        nemesisThread.start();
 
         try {
             cdl.await();
-//            nemesisThread.join();
+            nemesisThread.join();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -82,7 +83,11 @@ public class Controller {
 
         // TODO 感觉这里很多用map的应该抽象成类的
         ArrayList<Operation> operations = Support.TxtToOperations(this.recorder.getRecordFilePath());
-        this.linearizable.check(new HashMap(Map.of("name", this.config.getDbName(), "start-time", startTime)), operations, null);
+        Result result = this.linearizable.check(new HashMap(Map.of("name", this.config.getDbName(), "start-time", startTime)), operations, null);
+        if((boolean)result.getValid())
+            log.info("Congratulations! The whole process has passed the linearizable check.");
+        else
+            log.info("Sorry, the process is not linearizable! Please view the detail in store directory.");
     }
 
     private void SetUpDB() {

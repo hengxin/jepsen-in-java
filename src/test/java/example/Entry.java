@@ -1,10 +1,9 @@
 package example;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
+import core.checker.checker.Linearizable;
+import core.checker.checker.Operation;
 import core.checker.model.Register;
+import core.checker.vo.Result;
 import core.control.ControlConfig;
 import core.control.Controller;
 import core.db.Node;
@@ -16,7 +15,10 @@ import org.junit.jupiter.api.Test;
 import util.Constant;
 import util.Support;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static util.Constant.NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION;
 
@@ -43,13 +45,13 @@ public class Entry {
     }
 
     @Test
-    public void ReadAndWriteClientMainTest() {
+    public void OceanBaseRWTest() {
         constant.Init();
         ArrayList<Node> nodes = new ArrayList<>();
         nodes.add(new Node("192.168.62.7", 2881, "root", "root"));
         nodes.add(new Node("192.168.62.8", 2881, "root", "root"));
         nodes.add(new Node("192.168.62.9", 2881, "root", "root"));
-        Recorder recorder = new Recorder("output/oceanbase/read_write_client/", "history1.txt");
+        Recorder recorder = new Recorder("output/oceanbase/read_write_client/", "good.txt");
         ControlConfig controlConfig = new ControlConfig("Oceanbase", nodes, 3);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
         Controller controller = new Controller(controlConfig, new ReadAndWriteClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder,
@@ -63,7 +65,7 @@ public class Entry {
         String[] hosts = {"192.168.62.6", "192.168.62.7", "192.168.62.8", "192.168.62.9"};
         String[] obcontrol = {"192.168.62.6"};
         String[] observers = {"192.168.62.7", "192.168.62.8", "192.168.62.9"};
-        String[] test_server = {"192.168.62.8"};
+        String[] test_server = {"192.168.62.9"};
 //        String command = "systemctl status firewalld.service";
 //        String command = "systemctl restart chronyd.service && chronyc tracking";
 //        String command = Constant.TxtToString("src/main/resources/centos8_mysql.sh");
@@ -71,14 +73,14 @@ public class Entry {
 //                "chronyc tracking";
 //        String command = "chronyc tracking && chronyc sources -v";
 //        String command = "systemctl status chronyd";
-//        String command = "iptables -D INPUT 1\niptables -D INPUT 1";
+        String command = "iptables -D INPUT 1\niptables -D INPUT 1";
 //        String command = "iptables -D INPUT 1";
 //        String command = "iptables -I INPUT -s 192.168.62.7 -j DROP\n" +
-//                "iptables -I INPUT -s 192.168.62.9 -j DROP";
+//                "iptables -I INPUT -s 192.168.62.8 -j DROP";
 //        String command = "rm -rf /var/lib/cassandra/data\nsystemctl restart cassandra";
-        String command = "systemctl start cassandra";
+//        String command = "systemctl start cassandra";
 //        String command = "systemctl stop cassandra";
-        for(String host: observers) {
+        for(String host: test_server) {
             try {
                 Support.ExecuteCommand(new Node(host, 2881, "root", "root"), command);
             } catch (Exception e) {
@@ -89,18 +91,11 @@ public class Entry {
 
     @Test
     public void Test() {
-        String s = "" + 1 + 103;
-        System.out.println(s);
-    }
+        // 还有个bad 是因为一开始的值未变0 所以一开始读出来是88是上个测试遗留下的值
 
-    @Test
-    public void CassandraDemo() {
-        Cluster cluster = Cluster.builder().addContactPoint("192.168.62.7").withPort(9042).build();
-        Session session = cluster.connect("t");
-        ResultSet rs = session.execute("select num1 from rw where id=0;");
-        Row row = rs.one();
-        System.out.println(row.getInt(0));
-        session.close();
-        cluster.close();
+        ArrayList<Operation> operations = Support.TxtToOperations("output/oceanbase/read_write_client/good.txt");
+        Result result = new Linearizable(new HashMap(Map.of("algorithm", "wgl", "model", new Register(0))))
+                .check(new HashMap(Map.of("name", "oceanbase", "start-time", LocalDateTime.now())), operations, null);
+        System.out.println();
     }
 }

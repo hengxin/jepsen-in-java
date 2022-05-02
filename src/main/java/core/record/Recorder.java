@@ -52,6 +52,6 @@ public class Recorder {
     }
 
     public String getRecordFilePath() {
-        return this.file.getParent();       // TODO没测
+        return this.file.getPath();
     }
 }

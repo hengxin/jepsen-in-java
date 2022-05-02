@@ -53,7 +53,6 @@ public class ReadAndWriteClient extends Client {
 
     @Override
     public ClientInvokeResponse<?> Invoke(ClientRequest request) {
-//        RWRequest rwRequest = (RWRequest) request;
         if(request.getFunction() == Operation.F.READ) {
             String readSQL = "SELECT value FROM t WHERE `name` = \"%s\";";
             Function<ResultSet, Integer> handle = (ResultSet rs) -> {
