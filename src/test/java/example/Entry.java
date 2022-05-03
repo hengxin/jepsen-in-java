@@ -30,12 +30,14 @@ public class Entry {
 
     @Test
     public void CassandraRWTest() {
+        // cassandra在网络分区后 依旧可以成功写入 不会受到影响 但最终结果是非线性一致性的
+        // 但如果不引入nemesis 是可以通过check的 因此说明cassandra在故障注入方面做的不好
         constant.Init();
         ArrayList<Node> nodes = new ArrayList<>();
         nodes.add(new Node("192.168.62.7", 9042, "root", "root"));
         nodes.add(new Node("192.168.62.8", 9042, "root", "root"));
         nodes.add(new Node("192.168.62.9", 9042, "root", "root"));
-        Recorder recorder = new Recorder("output/cassandra/read_write_client/", "history1.txt");
+        Recorder recorder = new Recorder("output/cassandra/read_write_client/", "bad.txt");
         ControlConfig controlConfig = new ControlConfig("Cassandra", nodes, 3);
 //        Controller controller = new Controller(controlConfig, new WriteClientCreator(), NEMESIS_GENERATOR_RANDOM_KILL);
         Controller controller = new Controller(controlConfig, new ReadAndWriteDoubleClientCreator(), NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION, recorder,
@@ -93,9 +95,9 @@ public class Entry {
     public void Test() {
         // 还有个bad 是因为一开始的值未变0 所以一开始读出来是88是上个测试遗留下的值
 
-        ArrayList<Operation> operations = Support.TxtToOperations("output/oceanbase/read_write_client/bad.txt");
+        ArrayList<Operation> operations = Support.TxtToOperations("output/cassandra/read_write_client/good.txt");
         Result result = new Linearizable(new HashMap(Map.of("algorithm", "wgl", "model", new Register(0))))
-                .check(new HashMap(Map.of("name", "oceanbase", "start-time", LocalDateTime.now())), operations, new HashMap<>());
-        System.out.println();
+                .check(new HashMap(Map.of("name", "cassandra", "start-time", LocalDateTime.now())), operations, new HashMap<>());
+        System.out.println(result.getValid());
     }
 }

@@ -61,8 +61,9 @@ class PartitionGenerator implements NemesisGenerator {
         int size = nodes.size();
         if(size == 0)
             return operations;
-        String leaderIP = CheckLeaderIP(nodes.get(0));      // 随便一个node都能用来查主
-        log.info("Leader ip is " + leaderIP + ".");
+//        // OceanBase用
+//        String leaderIP = CheckLeaderIP(nodes.get(0));      // 随便一个node都能用来查主
+//        log.info("Leader ip is " + leaderIP + ".");
         ArrayList<Integer> shuffledIndices = Support.ShuffleByCount(size);
         Map<String, String> invokeArgs = new HashMap<>();
         Map<String, String> recoverArgs = new HashMap<>();
@@ -78,22 +79,22 @@ class PartitionGenerator implements NemesisGenerator {
                 operations.add(new NemesisOperation(NEMESIS_PARTITION_NODE, selectedNode, duration, invokeArgs, recoverArgs));
                 break;
             // leader <-x-> random one else
-            case NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION:
-                Node leaderNode = null;
-                String randomIP = "";
-                if(!leaderIP.equals("")) {
-                    for(int i = 0; i < size && (leaderNode == null || randomIP.equals("")); i++) {
-                        Node node = nodes.get(shuffledIndices.get(i));
-                        if(node.getIp().equals(leaderIP))
-                            leaderNode = node;
-                        else if(randomIP.equals(""))
-                            randomIP = node.getIp();
-                    }
-                    invokeArgs.put(PartitionNemesis.OTHER_IPS, randomIP);
-                    recoverArgs.put(PartitionNemesis.OTHER_NODES_COUNT, String.valueOf(1));
-                    operations.add(new NemesisOperation(NEMESIS_PARTITION_NODE, leaderNode, duration, invokeArgs, recoverArgs));
-                }
-                break;
+//            case NEMESIS_GENERATOR_ASYMMETRIC_NETWORK_PARTITION:
+//                Node leaderNode = null;
+//                String randomIP = "";
+//                if(!leaderIP.equals("")) {
+//                    for(int i = 0; i < size && (leaderNode == null || randomIP.equals("")); i++) {
+//                        Node node = nodes.get(shuffledIndices.get(i));
+//                        if(node.getIp().equals(leaderIP))
+//                            leaderNode = node;
+//                        else if(randomIP.equals(""))
+//                            randomIP = node.getIp();
+//                    }
+//                    invokeArgs.put(PartitionNemesis.OTHER_IPS, randomIP);
+//                    recoverArgs.put(PartitionNemesis.OTHER_NODES_COUNT, String.valueOf(1));
+//                    operations.add(new NemesisOperation(NEMESIS_PARTITION_NODE, leaderNode, duration, invokeArgs, recoverArgs));
+//                }
+//                break;
             default:
         }
         return operations;

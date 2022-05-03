@@ -30,8 +30,8 @@ public class ReadAndWriteDoubleClient extends Client {
         Session session = this.cluster.connect();
         String initSQL1 = "CREATE KEYSPACE t WITH replication = {'class':'SimpleStrategy', 'replication_factor':3};";
         String changeSQL = "USE t;";
-        String initSQL2 = "CREATE TABLE rw(id int PRIMARY KEY, num1 int, num2 int);";
-        String initSQL3 = "INSERT INTO rw (id, num1, num2) VALUES(0, 0, 0)";
+        String initSQL2 = "CREATE TABLE rw(id int PRIMARY KEY, num int);";
+        String initSQL3 = "INSERT INTO rw (id, num) VALUES(0, 0)";
         session.execute(initSQL1);
         session.execute(changeSQL);
         session.execute(initSQL2);
@@ -41,19 +41,12 @@ public class ReadAndWriteDoubleClient extends Client {
 
     @Override
     public ClientRequest NextRequest() {
-        float f1 = random.nextFloat();
-        float f2 = random.nextFloat();
-        if(f1 <= 0.5) {
-            if(f2 <= 0.5)
-                return new ClientRequest(Operation.F.READ, "num1", 0);
-            else
-                return new ClientRequest(Operation.F.READ, "num2", 0);
-        } else {
+        float f = random.nextFloat();
+        if(f <= 0.5)
+            return new ClientRequest(Operation.F.READ, "num", 0);
+        else {
             int nextValue = random.nextInt(100);
-            if(f2 <= 0.5)
-                return new ClientRequest(Operation.F.WRITE, "num1", nextValue);
-            else
-                return new ClientRequest(Operation.F.WRITE, "num2", nextValue);
+            return new ClientRequest(Operation.F.WRITE, "num", nextValue);
         }
     }
 
@@ -61,7 +54,6 @@ public class ReadAndWriteDoubleClient extends Client {
     public ClientInvokeResponse<?> Invoke(ClientRequest request) {
         try {
             Session session = this.cluster.connect("t");
-//            RWRequest rwRequest = (RWRequest) request;
             if(request.getFunction() == Operation.F.READ) {
                 String readSQL = "SELECT " + request.getTarget() + " from rw where id = 0;";
                 ResultSet resultSet = session.execute(readSQL);

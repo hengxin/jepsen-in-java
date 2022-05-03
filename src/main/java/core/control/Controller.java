@@ -83,7 +83,7 @@ public class Controller {
 
         // TODO 感觉这里很多用map的应该抽象成类的
         ArrayList<Operation> operations = Support.TxtToOperations(this.recorder.getRecordFilePath());
-        Result result = this.linearizable.check(new HashMap(Map.of("name", this.config.getDbName(), "start-time", startTime)), operations, null);
+        Result result = this.linearizable.check(new HashMap(Map.of("name", this.config.getDbName(), "start-time", startTime)), operations, new HashMap<>());
         if((boolean)result.getValid())
             log.info("Congratulations! The whole process has passed the linearizable check.");
         else
