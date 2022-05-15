@@ -205,15 +205,4 @@ class WglTest {
     }
 
 
-//    @Test
-//    void testHistory() {
-//        Model model = new Register(null);
-//        List<core.record.Operation> ops = Support.TxtToOperations("output/read_write_client/history1.txt", RWRequest.class);
-//        List<Op> history = ops.stream().map(o -> new Op(o)).collect(Collectors.toList());
-//        Map<String, Object> a = Wgl.analysis(model, history);
-//        String res = "";
-//
-//    }
-
-
 }

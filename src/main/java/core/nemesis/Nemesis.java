@@ -5,7 +5,6 @@ import core.db.Node;
 import java.util.Map;
 
 public interface Nemesis {
-    // Not static methods
     Exception Invoke(Node node, Map<String, String> invokeArgs);
 
     Exception Recover(Node node, Map<String, String> recoverArgs);

@@ -51,7 +51,7 @@ public class Recorder {
         }
     }
 
-    public String getRecordFilePath() {
+    public String GetRecordFilePath() {
         return this.file.getPath();
     }
 }

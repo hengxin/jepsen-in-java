@@ -26,13 +26,10 @@ import static util.Constant.NEMESIS_GENERATOR_SYMMETRIC_NETWORK_PARTITION;
 @Slf4j
 public class Entry {
 
-    Constant constant = new Constant();
-
     @Test
     public void CassandraRWTest() {
         // cassandra在网络分区后 依旧可以成功写入 不会受到影响 但最终结果是非线性一致性的
         // 但如果不引入nemesis 是可以通过check的 因此说明cassandra在故障注入方面做的不好
-        constant.Init();
         ArrayList<Node> nodes = new ArrayList<>();
         nodes.add(new Node("192.168.62.7", 9042, "root", "root"));
         nodes.add(new Node("192.168.62.8", 9042, "root", "root"));
@@ -48,7 +45,6 @@ public class Entry {
 
     @Test
     public void OceanBaseRWTest() {
-        constant.Init();
         ArrayList<Node> nodes = new ArrayList<>();
         nodes.add(new Node("192.168.62.7", 2881, "root", "root"));
         nodes.add(new Node("192.168.62.8", 2881, "root", "root"));

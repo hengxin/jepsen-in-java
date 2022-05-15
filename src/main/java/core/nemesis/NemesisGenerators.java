@@ -1,5 +1,6 @@
 package core.nemesis;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import static util.Constant.*;
 
 
 @Slf4j
+@AllArgsConstructor
 public class NemesisGenerators {
 
     // 静态方法，根据对应名字产生需要的generator
@@ -34,10 +36,6 @@ public class NemesisGenerators {
     ArrayList<NemesisGenerator> generators;
     int index;
 
-    public NemesisGenerators(ArrayList<NemesisGenerator> generators, int index) {
-        this.generators = generators;
-        this.index = index;
-    }
 
     public boolean HasNext() {
         return index < generators.size();
