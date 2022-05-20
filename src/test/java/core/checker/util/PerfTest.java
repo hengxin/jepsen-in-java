@@ -12,7 +12,6 @@ class PerfTest {
 
     @Test
     void broadenRange() {
-        List<Double> range = List.of(3.14, 3.14);
         List<Double> res = Perf.broadenRange(3.14, 3.14);
         List<Double> resExpected = List.of(2.14, 4.140000000000001);
         Assertions.assertEquals(resExpected, res);
@@ -20,7 +19,6 @@ class PerfTest {
 
     @Test
     void broadenRange2() {
-        List<Double> range = List.of(3.14, 5.14);
         List<Double> res = Perf.broadenRange(3.14, 5.14);
         List<Double> resExpected = List.of(3.1, 5.2);
         Assertions.assertEquals(resExpected, res);
@@ -137,10 +135,10 @@ class PerfTest {
         );
         Map<Double,List<List<?>>> res=Perf.bucketPoints(2, points);
         Assertions.assertEquals(res,Map.of(
-                1L,List.of(List.of(1,"a")),
-                3L,List.of(List.of(2,"b"),List.of(3,"c")),
-                5L,List.of(List.of(5,"e"),List.of(4,"d")),
-                7L,List.of(List.of(7,"g"),List.of(6,"f"))
+                1d,List.of(List.of(1,"a")),
+                3d,List.of(List.of(2,"b"),List.of(3,"c")),
+                5d,List.of(List.of(5,"e"),List.of(4,"d")),
+                7d,List.of(List.of(7,"g"),List.of(6,"f"))
         ));
 
     }

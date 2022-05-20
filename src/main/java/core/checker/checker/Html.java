@@ -1,7 +1,6 @@
-package core.checker.util;
+package core.checker.checker;
 
-import core.checker.checker.Checker;
-import core.checker.checker.Operation;
+import core.checker.util.TimeLine;
 import core.checker.vo.Result;
 import core.checker.vo.TestInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ public class Html implements Checker {
         int pairCount = pairs.size();
         int opLimit = TimeLine.OP_LIMIT;
         boolean truncated = opLimit < pairCount;
-        pairs = pairs.subList(0, opLimit);
+        pairs = pairs.subList(0, Math.min(opLimit,pairs.size()));
         String res = "<html>" +
                 "<head>" +
                 "<style>" + TimeLine.STYLE_SHEET + "</style>" +
@@ -40,9 +39,9 @@ public class Html implements Checker {
         }
         res += "<div class=\"ops\">" + ops + "</div>";
         try {
-            TestInfo testInfo = new TestInfo((String) test.get("name"), LocalDateTime.ofEpochSecond((long) test.get("start-time")/1000,0, ZoneOffset.ofHours(8)));
+            TestInfo testInfo = new TestInfo((String) test.get("name"), LocalDateTime.ofEpochSecond( ((LocalDateTime)test.get("start-time")).toEpochSecond(ZoneOffset.of("+8"))/1000,0, ZoneOffset.ofHours(8)));
             String[] args = new String[]{(String) opts.get("sub-directory"), "timeline.html"};
-            BufferedWriter out = new BufferedWriter(new FileWriter(Store.path(testInfo, args)));
+            BufferedWriter out = new BufferedWriter(new FileWriter(Store.makePathIfNotExists(testInfo, args)));
             out.write(res);
             out.close();
             log.info("successfully write to timeline.html");

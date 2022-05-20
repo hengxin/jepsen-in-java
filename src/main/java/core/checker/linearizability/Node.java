@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Node {
-    List<Op> ops;
-    Op lastWrite;
+    private List<Op> ops;
+    private Op lastWrite;
 }

@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Test;
 import us.bpsm.edn.parser.Parseable;
 import us.bpsm.edn.parser.Parser;
 import us.bpsm.edn.parser.Parsers;
+import util.Support;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static us.bpsm.edn.Keyword.newKeyword;
@@ -204,5 +206,13 @@ class WglTest {
 
     }
 
+    @Test
+    void readWrite(){
+        Model register=new Register(null);
+        ArrayList<Operation> operations = Support.TxtToOperations("output/oceanbase/read_write_client/good.txt");
+        List<Op> history=operations.stream().map(Op::new).collect(Collectors.toList());
+        Map<String,Object> res=Wgl.analysis(register,history);
+        Assertions.assertEquals(res.get("valid?"),true);
+    }
 
 }

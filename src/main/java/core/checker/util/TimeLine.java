@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 public class TimeLine {
-    final static int OP_LIMIT = 10000;
-    final static private Double TIME_SCALE = 1e6;
-    final static private Double COL_WIDTH = 100d;
-    final static private Double GUTTER_WIDTH = 106d;
-    final static private Double HEIGHT = 16d;
+    public final static int OP_LIMIT = 10000;
+    public final static  Double TIME_SCALE = 1e6;
+    public final static Double COL_WIDTH = 100d;
+    public final static Double GUTTER_WIDTH = 106d;
+    public final static  Double HEIGHT = 16d;
 
-    final static String STYLE_SHEET =
+    public final static String STYLE_SHEET =
             ".ops        { position: absolute; }\n" +
                     ".op         { position: absolute; padding: 2px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); transition: all 0.3s cubic-bezier(.25,.8,.25,1); overflow: hidden; }\n" +
                     ".op.invoke  { background: #eeeeee; }\n" +
@@ -183,7 +183,7 @@ public class TimeLine {
 
     public static String breadCrumbs(Map test, String historyKey) {
         String filesName = "/files/" + (String) test.get("name");
-        String startTime = linkifyTime((String) test.get("time"));
+        String startTime = linkifyTime(test.get("time").toString());
         String indep = "independent";
         String key = historyKey;
         return "<div>" +

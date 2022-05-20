@@ -1,5 +1,6 @@
 package core.checker.checker;
 
+import core.checker.linearizability.GK;
 import core.checker.linearizability.Op;
 import core.checker.linearizability.Report;
 import core.checker.linearizability.Wgl;
@@ -11,10 +12,7 @@ import util.Store;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,11 +32,15 @@ public class Linearizable implements Checker {
 
     @Override
     public Result check(Map test, List<Operation> history, Map opts) {
-        Map<String, Object> a;
+        Map<String, Object> a = new HashMap<>();
         switch (algorithm.toString()) {
-            case "linear":
-                a = Wgl.analysis(model, history.stream().map(Op::new).collect(Collectors.toList()));
-                break;
+            case "gk":
+                GK gk = new GK(history.stream().map(Op::new).collect(Collectors.toList()));
+                boolean res = gk.linearizable();
+                a.put("valid?", res);
+                Result result = new Result(res);
+                result.setRes(a);
+                return result;
             case "wgl":
                 a = Wgl.analysis(model, history.stream().map(Op::new).collect(Collectors.toList()));
                 break;

@@ -2,6 +2,8 @@ package core.checker.checker;
 
 import core.checker.linearizability.Op;
 import core.checker.model.Register;
+import core.checker.vo.Result;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.bpsm.edn.parser.Parseable;
 import us.bpsm.edn.parser.Parser;
@@ -68,5 +70,18 @@ class LinearizableTest {
         ));
         Linearizable linearizable=new Linearizable(opts);
         linearizable.check(new HashMap<>(Map.of("name","bad-analysis","start-time", LocalDateTime.now())),history,new HashMap());
+    }
+
+    @Test
+    void checkGK() {
+        String file = "data/cas-register/bad/bad-analysis.edn";
+        List<Operation> history = constructOps(file);
+        Map<String,Object> opts=new HashMap<>(Map.of(
+                "algorithm","gk",
+                "model",new Register(0)
+        ));
+        Linearizable linearizable=new Linearizable(opts);
+        Result result=linearizable.check(new HashMap<>(Map.of("name","bad-analysis","start-time", LocalDateTime.now())),history,new HashMap<>());
+        Assertions.assertEquals(result.getValid(),false);
     }
 }

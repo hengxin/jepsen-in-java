@@ -231,9 +231,9 @@ public class Perf {
         plot.put("series", res);
     }
 
-    public static double mod(double num, double div) {
-        return num - Math.floor(num / div) * div;
-    }
+        public static double mod(double num, double div) {
+            return num - Math.floor(num / div) * div;
+        }
 
     /**
      * @param a lower
@@ -250,13 +250,13 @@ public class Perf {
         double size = Math.abs(b - a);
         double grid = size / 10;
         double scale = Math.pow(10, Math.round(Math.log10(grid)));
-        double a_new = a - mod(a, scale);
+        double a_new = a - mod(a,scale);
         double b_new;
-        double m = mod(b, scale);
+        double m = mod(b,scale);
         if (m / scale < 0.001) {
             b_new = b;
         } else {
-            b_new = scale + (b - mod(b, scale));
+            b_new = scale + (b - mod(b,scale));
         }
 
         a_new = Math.min(a, a_new);

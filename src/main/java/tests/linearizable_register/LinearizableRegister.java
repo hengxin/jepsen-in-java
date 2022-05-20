@@ -5,7 +5,7 @@ import core.checker.checker.Compose;
 import core.checker.checker.Linearizable;
 import core.checker.checker.Operation;
 import core.checker.model.CASRegister;
-import core.checker.util.Html;
+import core.checker.checker.Html;
 import tests.Invoke;
 
 import java.util.*;
